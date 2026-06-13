@@ -312,6 +312,33 @@ a{color:inherit;text-decoration:none}
 .profile-badge-av{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.4)}
 .profile-badge-name{font-size:12px;font-weight:700;color:#fff}
 
+
+/* ── LEDGER ── */
+.ldg-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.ldg-ftag{padding:5px 12px;border-radius:20px;border:1.5px solid #E5E5EA;font-size:11px;font-weight:700;cursor:pointer;background:#fff;font-family:inherit;color:#6E6E73;transition:all .15s}
+.ldg-ftag.on{color:#fff;border-color:transparent}
+.ldg-row{background:#fff;border-radius:14px;border:1px solid #E5E5EA;padding:13px 14px;margin-bottom:8px;position:relative}
+.ldg-row-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.ldg-cat{width:34px;height:34px;border-radius:10px;background:#F5F5F7;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ldg-info{flex:1;min-width:0}
+.ldg-desc{font-size:13px;font-weight:700;color:#1D1D1F;margin-bottom:2px}
+.ldg-meta{font-size:10px;color:#AEAEB2}
+.ldg-amt{text-align:right;flex-shrink:0}
+.ldg-amt-main{font-size:15px;font-weight:900}
+.ldg-amt-twd{font-size:10px;color:#AEAEB2}
+.ldg-detail{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;border-top:1px solid #F5F5F7;padding-top:8px}
+.ldg-d{background:#F5F5F7;border-radius:8px;padding:6px 10px}
+.ldg-d-lbl{font-size:9px;color:#AEAEB2;margin-bottom:2px}
+.ldg-d-val{font-size:11px;font-weight:700;color:#1D1D1F}
+.ldg-who-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
+.ldg-action{font-size:9px;padding:2px 7px;border-radius:6px;font-weight:700}
+.ldg-total-bar{background:#1D1D1F;border-radius:14px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.ldg-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.ldg-stat{background:#fff;border-radius:12px;padding:12px;border:1px solid #E5E5EA;text-align:center}
+.ldg-stat-n{font-size:18px;font-weight:900;margin-bottom:2px}
+.ldg-stat-l{font-size:9px;color:#AEAEB2;font-weight:700;letter-spacing:.3px}
+.ldg-empty{text-align:center;padding:40px 0;color:#AEAEB2;font-size:13px}
+
 </style>
 </head>
 <body>
@@ -373,6 +400,7 @@ a{color:inherit;text-decoration:none}
     <button class="nbtn" data-t="hotels" onclick="goTab(this)">🏨 住宿</button>
     <button class="nbtn" data-t="food" onclick="goTab(this)">🍜 美食</button>
     <button class="nbtn" data-t="split" onclick="goTab(this)">💰 分帳</button>
+    <button class="nbtn" data-t="ledger" onclick="goTab(this)">📋 帳本</button>
   </nav>
   <div class="sec on" id="sec-mydays"></div>
   <div class="sec" id="sec-members"></div>
@@ -381,6 +409,7 @@ a{color:inherit;text-decoration:none}
   <div class="sec" id="sec-food"></div>
 </div>
   <div class="sec" id="sec-split"></div>
+  <div class="sec" id="sec-ledger"></div>
 <button class="chbtn" id="chbtn" style="display:none" onclick="openProfileModal()">👤 帳號</button>
 <button id="quick-split-btn" style="display:none;position:fixed;bottom:80px;left:18px;z-index:149;background:#FFD234;color:#1D1D1F;border:none;border-radius:50px;padding:11px 18px;font-size:13px;font-weight:800;box-shadow:0 4px 20px rgba(0,0,0,.2);cursor:pointer;font-family:inherit" onclick="quickOpenSplit()">💰 記帳</button>
 
@@ -663,8 +692,10 @@ function refreshNavColor(){
 }
 
 // ── APP ──
-function buildApp(){
-  buildHero(); buildMyDays(); buildMembers(); buildFlights(); buildHotels(); buildFood(); buildSplit();
+async function buildApp(){
+  buildHero(); buildMyDays(); buildMembers(); buildFlights(); buildHotels(); buildFood();
+  await buildSplit();
+  buildLedger();
 }
 
 function buildHero(){
@@ -987,9 +1018,14 @@ function syncSheets(action, item) {
 
 
 async function buildSplit(){
-  // Show loading
+  // Pre-render with cached localStorage data immediately (no blank)
+  try{ const saved=localStorage.getItem('thai_trip_expenses'); if(saved) SP.items=JSON.parse(saved); }catch(e){}
+  renderSPList();
+  renderSPResults();
+  
+  // Show loading indicator
   const syncEl = document.getElementById('sp-sync-status');
-  if(syncEl) { syncEl.textContent = '⟳ 載入中...'; syncEl.style.color = '#AEAEB2'; }
+  if(syncEl) { syncEl.textContent = '⟳ 更新中...'; syncEl.style.color = '#AEAEB2'; }
   
   // Try Supabase first
   const sbItems = await sbLoadAll();
@@ -1005,6 +1041,8 @@ async function buildSplit(){
     try{ const saved=localStorage.getItem('thai_trip_expenses'); if(saved) SP.items=JSON.parse(saved); }catch(e){}
   }
   if(syncEl) syncEl.textContent = '';
+  renderSPList();
+  renderSPResults();
   const sec = document.getElementById('sec-split');
   const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C4522A';
   sec.innerHTML = `
@@ -1429,6 +1467,126 @@ function selectPerson(name){
     showProfileBadge();
     try{ localStorage.setItem('thai_trip_acct',JSON.stringify(ACCT)); }catch(e){}
   },350);
+}
+
+// ── LEDGER ──
+let ldgFilter = 'all'; // all | by person name
+
+function buildLedger(){
+  const sec = document.getElementById('sec-ledger');
+  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#C4522A';
+  sec.innerHTML = `
+    <div class="sh2">📋 完整帳本</div>
+
+    <!-- Stats -->
+    <div class="ldg-stats" id="ldg-stats"></div>
+
+    <!-- Total bar -->
+    <div class="ldg-total-bar">
+      <span style="color:rgba(255,255,255,.6);font-size:12px;font-weight:600">所有費用合計</span>
+      <span style="color:#FFD234;font-size:20px;font-weight:900" id="ldg-grand">TWD 0</span>
+    </div>
+
+    <!-- Filter by person -->
+    <div class="ldg-filter" id="ldg-filter"></div>
+
+    <!-- Rows -->
+    <div id="ldg-rows"></div>
+  `;
+  renderLedger();
+}
+
+function renderLedger(){
+  if(!document.getElementById('ldg-rows')) return;
+
+  const items = SP.items.slice().reverse(); // oldest first
+  const filtered = ldgFilter==='all' ? items : items.filter(i=>i.payer===ldgFilter||i.who.includes(ldgFilter));
+
+  // Stats
+  const grand = items.reduce((s,i)=>s+toTWD(i.amt,i.cur),0);
+  const byPayer = {};
+  items.forEach(i=>{ byPayer[i.payer]=(byPayer[i.payer]||0)+toTWD(i.amt,i.cur); });
+  const topPayer = Object.entries(byPayer).sort((a,b)=>b[1]-a[1])[0];
+  const statsEl = document.getElementById('ldg-stats');
+  if(statsEl) statsEl.innerHTML = `
+    <div class="ldg-stat">
+      <div class="ldg-stat-n" style="color:var(--accent)">${items.length}</div>
+      <div class="ldg-stat-l">總筆數</div>
+    </div>
+    <div class="ldg-stat">
+      <div class="ldg-stat-n" style="color:var(--accent);font-size:13px">${fmtTWD(grand)}</div>
+      <div class="ldg-stat-l">總金額</div>
+    </div>
+    <div class="ldg-stat">
+      <div class="ldg-stat-n" style="color:${topPayer?MEMBERS[topPayer[0]]?.color||'#888':'#AEAEB2'};font-size:14px">${topPayer?topPayer[0]:'—'}</div>
+      <div class="ldg-stat-l">墊付最多</div>
+    </div>`;
+
+  const grandEl = document.getElementById('ldg-grand');
+  if(grandEl) grandEl.textContent = fmtTWD(grand);
+
+  // Filter tabs
+  const filterEl = document.getElementById('ldg-filter');
+  if(filterEl){
+    const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#C4522A';
+    const allActive = ldgFilter==='all';
+    filterEl.innerHTML = `<button class="ldg-ftag ${allActive?'on':''}" style="${allActive?'background:'+ac:''}" onclick="setLdgFilter('all',this)">全部</button>`
+      + Object.entries(MEMBERS).map(([name,m])=>{
+        const on = ldgFilter===name;
+        return `<button class="ldg-ftag ${on?'on':''}" style="${on?'background:'+m.color+';border-color:'+m.color:''};${!on?'':'color:#fff'}" onclick="setLdgFilter('${name}',this)">${name}</button>`;
+      }).join('');
+  }
+
+  // Rows
+  const rowsEl = document.getElementById('ldg-rows');
+  if(!rowsEl) return;
+  if(filtered.length===0){
+    rowsEl.innerHTML='<div class="ldg-empty">🧾<br>沒有符合的費用</div>';
+    return;
+  }
+
+  rowsEl.innerHTML = filtered.map(item=>{
+    const twd = toTWD(item.amt,item.cur);
+    const perHead = item.who.length>0 ? twd/item.who.length : twd;
+    const ac2 = MEMBERS[item.payer]?.color||'#888';
+    const whoTags = item.who.map(n=>`<span class="who-tag" style="color:${MEMBERS[n]?.color||'#888'};background:${MEMBERS[n]?.color||'#888'}18;border-color:${MEMBERS[n]?.color||'#888'}38">${n}</span>`).join('');
+    const isMe = item.addedBy===ACCT.name||item.addedBy===ACCT.member;
+    const actionColor = item.action==='edit'?'#FF9500':item.action==='deleted'?'#FF3B30':'#34C759';
+    const actionLabel = item.action==='edit'?'已編輯':item.action==='deleted'?'已刪除':'新增';
+
+    return `<div class="ldg-row" onclick="showSPDetail(${item.id})">
+      <div class="ldg-row-top">
+        <div class="ldg-cat">${getCatIcon(item.cat)}</div>
+        <div class="ldg-info">
+          <div class="ldg-desc">${item.desc}</div>
+          <div class="ldg-meta">${item.time} · 由 <b style="color:${MEMBERS[item.addedBy]?.color||ac2}">${item.addedBy}</b> 記帳
+            <span class="ldg-action" style="background:${actionColor}18;color:${actionColor};margin-left:4px">${actionLabel}</span>
+          </div>
+        </div>
+        <div class="ldg-amt">
+          <div class="ldg-amt-main" style="color:${ac2}">${fmt(item.amt,item.cur)}</div>
+          <div class="ldg-amt-twd">≈ ${fmtTWD(twd)}</div>
+        </div>
+      </div>
+      <div class="ldg-detail">
+        <div class="ldg-d">
+          <div class="ldg-d-lbl">付款人</div>
+          <div class="ldg-d-val" style="color:${ac2}">${item.payer}</div>
+        </div>
+        <div class="ldg-d">
+          <div class="ldg-d-lbl">每人分攤</div>
+          <div class="ldg-d-val">${fmtTWD(perHead)} ÷${item.who.length}人</div>
+        </div>
+      </div>
+      <div class="ldg-who-tags" style="margin-top:8px">${whoTags}</div>
+      ${isMe?`<div style="position:absolute;top:10px;right:10px;font-size:9px;color:#AEAEB2">我記的 ✎</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function setLdgFilter(val, btn){
+  ldgFilter = val;
+  renderLedger();
 }
 
 function initApp(){
