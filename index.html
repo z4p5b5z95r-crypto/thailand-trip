@@ -162,6 +162,48 @@ a{color:inherit;text-decoration:none}
 .rdivlbl{font-size:12px;font-weight:800;letter-spacing:1px}
 
 @media(max-width:380px){.pgrid{grid-template-columns:repeat(3,1fr)}}
+
+/* SPLIT */
+.split-wrap{max-width:680px;margin:0 auto}
+.split-card{background:var(--w);border-radius:16px;border:1px solid var(--g3);padding:16px;margin-bottom:10px}
+.split-card-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ink)}
+.split-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+.split-input{flex:1;min-width:80px;padding:9px 11px;border:1.5px solid var(--g3);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
+.split-input:focus{border-color:var(--accent)}
+.split-select{padding:9px 11px;border:1.5px solid var(--g3);border-radius:10px;font-size:13px;font-family:inherit;background:var(--w);outline:none;cursor:pointer}
+.split-label{font-size:11px;font-weight:700;color:var(--mid);margin-bottom:4px;display:block}
+.split-who{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.split-who-btn{padding:5px 11px;border-radius:20px;border:1.5px solid var(--g3);font-size:11px;font-weight:700;cursor:pointer;background:var(--w);color:var(--mid);transition:all .15s;font-family:inherit}
+.split-who-btn.sel{color:#fff;border-color:transparent}
+.split-desc{width:100%;padding:9px 11px;border:1.5px solid var(--g3);border-radius:10px;font-size:13px;font-family:inherit;outline:none}
+.split-desc:focus{border-color:var(--accent)}
+.split-add-btn{width:100%;padding:11px;border-radius:12px;font-size:13px;font-weight:700;color:#fff;border:none;cursor:pointer;margin-top:4px;transition:opacity .15s}
+.split-add-btn:hover{opacity:.88}
+.split-list{margin-bottom:16px}
+.split-item{background:var(--w);border-radius:14px;border:1px solid var(--g3);padding:13px 15px;margin-bottom:8px;position:relative}
+.split-item-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.split-item-desc{font-size:13px;font-weight:700;color:var(--ink)}
+.split-item-amt{font-size:14px;font-weight:900;color:var(--accent)}
+.split-item-who{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px}
+.split-item-del{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:var(--g4);border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
+.split-item-del:hover{background:#FFE5E5;color:#FF3B30}
+.split-item-note{font-size:10px;color:var(--mid)}
+.result-card{background:var(--w);border-radius:16px;border:1px solid var(--g3);overflow:hidden;margin-bottom:10px}
+.result-hd{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.result-hd-name{font-size:15px;font-weight:800}
+.result-hd-total{font-size:18px;font-weight:900}
+.result-items{border-top:1px solid var(--g4)}
+.result-item{padding:9px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--g4);font-size:11px}
+.result-item:last-child{border-bottom:none}
+.result-item-desc{color:var(--mid);flex:1;margin-right:8px}
+.result-item-amt{font-weight:700;color:var(--ink);flex-shrink:0}
+.rate-bar{background:var(--g4);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.rate-item{font-size:11px;color:var(--mid)}
+.rate-item b{color:var(--ink);font-weight:700}
+.rate-edit{font-size:10px;color:var(--accent);cursor:pointer;font-weight:700}
+.currency-tabs{display:flex;gap:6px;margin-bottom:16px}
+.ctab{padding:5px 14px;border-radius:20px;border:1.5px solid var(--g3);font-size:11px;font-weight:700;cursor:pointer;background:var(--w);color:var(--mid);font-family:inherit;transition:all .15s}
+.ctab.on{color:#fff;border-color:transparent}
 </style>
 </head>
 <body>
@@ -199,6 +241,7 @@ a{color:inherit;text-decoration:none}
     <button class="nbtn" data-t="flights" onclick="goTab(this)">✈️ 航班</button>
     <button class="nbtn" data-t="hotels" onclick="goTab(this)">🏨 住宿</button>
     <button class="nbtn" data-t="food" onclick="goTab(this)">🍜 美食</button>
+    <button class="nbtn" data-t="split" onclick="goTab(this)">💰 分帳</button>
   </nav>
   <div class="sec on" id="sec-mydays"></div>
   <div class="sec" id="sec-members"></div>
@@ -206,6 +249,7 @@ a{color:inherit;text-decoration:none}
   <div class="sec" id="sec-hotels"></div>
   <div class="sec" id="sec-food"></div>
 </div>
+  <div class="sec" id="sec-split"></div>
 <button class="chbtn" id="chbtn" style="display:none" onclick="showPick()">👤 換人</button>
 
 <script>
@@ -370,7 +414,8 @@ const DAYS=[
   ]},
   {id:'d13',day:'D13',date:'8/4 二',region:'kr',title:'🏖 入住喀比帕南度假村 · 阿南海灘探索',items:[
     {t:'12:00',e:'🏨',n:'退房 COSI → 入住 Panan Krabi Resort',d:'8/4–8/6 共 2 晚，提前訂享 28% 早鳥優惠。',mapname:'Panan Krabi Resort Ao Nang'},
-    {t:'下午',e:'🌅',n:'阿南海灘 Ao Nang Beach',d:'甲米主要海灘，餐廳、酒吧、跳島船出發點，晚上有海灘夜市。',gmcoord:[8.0321,98.8285]},
+    {t:'下午',e:'🛶',n:'Klongroot 紅樹林獨木舟',d:'划獨木舟穿越甲米翠綠紅樹林秘境，水清見底超美！約 2 小時，書書、將軍兩人同行。',tip:'可在 Tripadvisor 或現場預約，建議下午 2–4 點出發最涼爽。',mapname:'Kayak Klongroot Viewpoint Krabi Thailand'},
+    {t:'傍晚',e:'🌅',n:'阿南海灘 Ao Nang Beach',d:'獨木舟完回阿南海灘逛逛，晚上有海灘夜市。',gmcoord:[8.0321,98.8285]},
     {t:'晚上',e:'🍹',n:'海灘酒吧・看夕陽',d:'看石灰岩峭壁染上橘紅色，人生值得。'},
   ]},
   {id:'d14',day:'D14',date:'8/5 三',region:'kr',title:'🏝 萊利海灘 + 四島跳船',items:[
@@ -418,12 +463,12 @@ const HOTELS=[
   {city:'曼谷',color:BK,stays:[
     {name:'Amara Bangkok Hotel',dates:'7/28–7/30',nights:2,who:'峰哥・依凡・棋哥・將軍',note:'含早餐・Sala Daeng BTS',price:'3,340/人',mapname:'Amara Bangkok Hotel Surawong'},
     {name:'曼谷茉莉花59號飯店',dates:'7/30–8/1',nights:2,who:'依凡・棋哥・將軍・書書・小武・阿淳（六人最齊！）',note:'靠近 BTS Thong Lor，不含早餐',price:'2,330/人',mapname:'Mojim Hotel Bangkok Thonglor Sukhumvit 59'},
-    {name:'Millennium Hilton Bangkok',dates:'8/1–8/3',nights:2,who:'將軍・書書・小武・阿淳',note:'含早餐・Twin Deluxe x2 房',price:'依確認函',mapname:'Millennium Hilton Bangkok Charoennakorn'},
-    {name:'Staybridge Suites Thonglor',dates:'8/7–8/8',nights:1,who:'書書・將軍',note:'書書回台前最後一晚・Thonglor 通羅',price:'依訂單',mapname:'Staybridge Suites Bangkok Thonglor'},
+    {name:'Millennium Hilton Bangkok',dates:'8/1–8/3',nights:2,who:'將軍・書書・小武・阿淳',note:'含早餐・Twin Deluxe x2 房',price:'THB 18,821（四人）',mapname:'Millennium Hilton Bangkok Charoennakorn'},
+    {name:'Staybridge Suites Thonglor',dates:'8/7–8/8',nights:1,who:'書書・將軍',note:'書書回台前最後一晚・Thonglor 通羅',price:'THB 3,426（兩人）',mapname:'Staybridge Suites Bangkok Thonglor'},
     {name:'將軍曼谷住宿',dates:'8/8–8/13',nights:5,who:'將軍',note:'書書 8/8 回台後將軍獨住',price:'待確認',mapname:null},
   ]},
   {city:'甲米',color:KR,stays:[
-    {name:'COSI Krabi Ao Nang Beach',dates:'8/3–8/4',nights:1,who:'書書（將軍另訂）',note:'阿南海灘・含早餐+每日飲料額度',price:'依訂單',mapname:'COSI Krabi Ao Nang Beach'},
+    {name:'COSI Krabi Ao Nang Beach',dates:'8/3–8/4',nights:1,who:'書書（將軍另訂）',note:'King Room・含早餐+每日飲料額度',price:'TWD 1,011（兩人）',mapname:'COSI Krabi Ao Nang Beach'},
     {name:'Panan Krabi Resort（喀比帕南）',dates:'8/4–8/6',nights:2,who:'書書・將軍',note:'城武（將軍）訂・28% 早鳥優惠',price:'2,488/人',mapname:'Panan Krabi Resort Ao Nang'},
     {name:'Tinidee Hideaway Tonsai Beach',dates:'8/6–8/7',nights:1,who:'書書・將軍',note:'通塞秘境海灘・只能搭船抵達',price:'TWD 4,092',mapname:'Tinidee Hideaway Tonsai Beach Krabi'},
   ]},
@@ -487,7 +532,7 @@ function refreshNavColor(){
 
 // ── APP ──
 function buildApp(){
-  buildHero(); buildMyDays(); buildMembers(); buildFlights(); buildHotels(); buildFood();
+  buildHero(); buildMyDays(); buildMembers(); buildFlights(); buildHotels(); buildFood(); buildSplit();
 }
 
 function buildHero(){
@@ -588,6 +633,268 @@ function goTab(btn){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function toggleDay(id){document.getElementById('dc-'+id).classList.toggle('open');}
+// ── SPLIT ──
+let splitItems = [];
+let splitCurrency = 'TWD';
+
+const RATES_DEFAULT = {THB_TWD: 0.87, USD_TWD: 32.5, THB_USD: 0.027};
+let rates = {...RATES_DEFAULT};
+
+function toTWD(amount, currency){
+  if(currency==='TWD') return amount;
+  if(currency==='THB') return amount * rates.THB_TWD;
+  if(currency==='USD') return amount * rates.USD_TWD;
+  return amount;
+}
+
+function fmtTWD(n){ return 'TWD ' + Math.round(n).toLocaleString(); }
+function fmtAmt(n, cur){
+  if(cur==='THB') return 'THB ' + n.toLocaleString();
+  if(cur==='USD') return 'USD ' + n.toFixed(2);
+  return 'TWD ' + n.toLocaleString();
+}
+
+function buildSplit(){
+  const sec = document.getElementById('sec-split');
+  sec.innerHTML = `
+    <div class="sh2">💰 分帳計算</div>
+    <div class="rate-bar" id="rate-bar">
+      <span class="rate-item">匯率：<b id="r-thb">1 THB = ${rates.THB_TWD} TWD</b></span>
+      <span class="rate-item"><b id="r-usd">1 USD = ${rates.USD_TWD} TWD</b></span>
+      <span class="rate-edit" onclick="editRates()">✏️ 調整匯率</span>
+    </div>
+
+    <!-- Add expense card -->
+    <div class="split-card">
+      <div class="split-card-title">➕ 新增費用</div>
+      <label class="split-label">說明</label>
+      <input class="split-input split-desc" id="sp-desc" placeholder="例：Copper 自助餐" style="width:100%;margin-bottom:10px">
+      <div class="split-row">
+        <div style="flex:2;min-width:100px">
+          <label class="split-label">金額</label>
+          <input class="split-input" id="sp-amt" type="number" placeholder="0" style="width:100%">
+        </div>
+        <div>
+          <label class="split-label">幣別</label>
+          <select class="split-select" id="sp-cur">
+            <option value="TWD">TWD 台幣</option>
+            <option value="THB">THB 泰銖</option>
+            <option value="USD">USD 美金</option>
+          </select>
+        </div>
+      </div>
+      <label class="split-label">誰要分？（點選）</label>
+      <div class="split-who" id="sp-who"></div>
+      <button class="split-add-btn" id="sp-add-btn" onclick="addSplitItem()">新增這筆費用</button>
+    </div>
+
+    <!-- Items list -->
+    <div id="sp-list"></div>
+
+    <!-- Results -->
+    <div class="sh2" style="margin-top:8px">📊 結算總覽</div>
+    <div class="currency-tabs">
+      <button class="ctab on" id="ctab-TWD" onclick="setCur('TWD',this)">TWD 台幣</button>
+      <button class="ctab" id="ctab-THB" onclick="setCur('THB',this)">THB 泰銖</button>
+      <button class="ctab" id="ctab-USD" onclick="setCur('USD',this)">USD 美金</button>
+    </div>
+    <div id="sp-results"></div>
+  `;
+
+  // Build who buttons
+  const whoWrap = document.getElementById('sp-who');
+  const allBtn = document.createElement('button');
+  allBtn.className='split-who-btn sel';
+  allBtn.textContent='全選';
+  allBtn.style.background='#555';
+  allBtn.dataset.name='__all__';
+  allBtn.onclick=()=>toggleAllWho();
+  whoWrap.appendChild(allBtn);
+
+  Object.entries(MEMBERS).forEach(([name,m])=>{
+    const b = document.createElement('button');
+    b.className='split-who-btn sel';
+    b.textContent=name;
+    b.style.background=m.color;
+    b.style.borderColor=m.color;
+    b.dataset.name=name;
+    b.onclick=()=>toggleWho(b,name,m.color);
+    whoWrap.appendChild(b);
+  });
+
+  // Set add button color
+  document.getElementById('sp-add-btn').style.background=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1A4B8C';
+
+  renderList();
+  renderResults();
+}
+
+function toggleWho(btn, name, color){
+  if(btn.classList.contains('sel')){
+    btn.classList.remove('sel');
+    btn.style.background='';
+    btn.style.borderColor='';
+    btn.style.color='';
+  } else {
+    btn.classList.add('sel');
+    btn.style.background=color;
+    btn.style.borderColor=color;
+    btn.style.color='#fff';
+  }
+  updateAllBtn();
+}
+
+function toggleAllWho(){
+  const allBtn = document.querySelector('#sp-who [data-name="__all__"]');
+  const memberBtns = document.querySelectorAll('#sp-who [data-name]:not([data-name="__all__"])');
+  const allSel = allBtn.classList.contains('sel');
+  if(allSel){
+    // deselect all
+    memberBtns.forEach(b=>{b.classList.remove('sel');b.style.background='';b.style.borderColor='';b.style.color='';});
+    allBtn.classList.remove('sel'); allBtn.style.background=''; allBtn.style.color='';
+  } else {
+    // select all
+    memberBtns.forEach(b=>{
+      const name=b.dataset.name; const color=MEMBERS[name]?.color;
+      b.classList.add('sel'); b.style.background=color; b.style.borderColor=color; b.style.color='#fff';
+    });
+    allBtn.classList.add('sel'); allBtn.style.background='#555'; allBtn.style.color='#fff';
+  }
+}
+
+function updateAllBtn(){
+  const allBtn = document.querySelector('#sp-who [data-name="__all__"]');
+  if(!allBtn) return;
+  const memberBtns = document.querySelectorAll('#sp-who [data-name]:not([data-name="__all__"])');
+  const allSel = [...memberBtns].every(b=>b.classList.contains('sel'));
+  if(allSel){ allBtn.classList.add('sel'); allBtn.style.background='#555'; allBtn.style.color='#fff'; }
+  else { allBtn.classList.remove('sel'); allBtn.style.background=''; allBtn.style.color=''; }
+}
+
+function getSelectedWho(){
+  return [...document.querySelectorAll('#sp-who [data-name]:not([data-name="__all__"])')].filter(b=>b.classList.contains('sel')).map(b=>b.dataset.name);
+}
+
+function addSplitItem(){
+  const desc = document.getElementById('sp-desc').value.trim();
+  const amt = parseFloat(document.getElementById('sp-amt').value);
+  const cur = document.getElementById('sp-cur').value;
+  const who = getSelectedWho();
+  if(!desc){ alert('請填寫說明！'); return; }
+  if(!amt || amt<=0){ alert('請填寫金額！'); return; }
+  if(who.length===0){ alert('請選擇分帳的人！'); return; }
+  splitItems.push({id:Date.now(), desc, amt, cur, who});
+  document.getElementById('sp-desc').value='';
+  document.getElementById('sp-amt').value='';
+  renderList();
+  renderResults();
+}
+
+function deleteSplitItem(id){
+  splitItems = splitItems.filter(i=>i.id!==id);
+  renderList();
+  renderResults();
+}
+
+function renderList(){
+  const wrap = document.getElementById('sp-list');
+  if(!wrap) return;
+  if(splitItems.length===0){
+    wrap.innerHTML='<div style="text-align:center;padding:20px;color:var(--mid);font-size:13px">還沒有任何費用，新增第一筆吧！</div>';
+    return;
+  }
+  wrap.innerHTML = splitItems.map(item=>{
+    const whoTags = item.who.map(n=>{const c=MEMBERS[n]?.color||'#888';return`<span class="who-tag" style="color:${c};background:${c}18;border-color:${c}38">${n}</span>`;}).join('');
+    const perHead = toTWD(item.amt, item.cur) / item.who.length;
+    return `<div class="split-item">
+      <button class="split-item-del" onclick="deleteSplitItem(${item.id})">✕</button>
+      <div class="split-item-top">
+        <div class="split-item-desc">${item.desc}</div>
+        <div class="split-item-amt">${fmtAmt(item.amt, item.cur)}</div>
+      </div>
+      <div class="split-item-who">${whoTags}</div>
+      <div class="split-item-note">每人 ${fmtTWD(perHead)} · 共 ${item.who.length} 人分</div>
+    </div>`;
+  }).join('');
+}
+
+function setCur(cur, btn){
+  splitCurrency = cur;
+  document.querySelectorAll('.ctab').forEach(b=>{b.classList.remove('on');b.style.background='';b.style.color='';b.style.borderColor='';});
+  btn.classList.add('on');
+  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1A4B8C';
+  btn.style.background=ac; btn.style.color='#fff'; btn.style.borderColor=ac;
+  renderResults();
+}
+
+function convertFromTWD(twd, cur){
+  if(cur==='TWD') return twd;
+  if(cur==='THB') return twd / rates.THB_TWD;
+  if(cur==='USD') return twd / rates.USD_TWD;
+  return twd;
+}
+
+function fmtCur(n, cur){
+  if(cur==='THB') return 'THB ' + Math.round(n).toLocaleString();
+  if(cur==='USD') return 'USD ' + n.toFixed(2);
+  return 'TWD ' + Math.round(n).toLocaleString();
+}
+
+function renderResults(){
+  const wrap = document.getElementById('sp-results');
+  if(!wrap) return;
+  if(splitItems.length===0){ wrap.innerHTML='<div style="text-align:center;padding:16px;color:var(--mid);font-size:13px">新增費用後這裡會顯示每人應付金額</div>'; return; }
+
+  // Calculate per person
+  const totals = {}; // name → {twd, items:[{desc,twd}]}
+  Object.keys(MEMBERS).forEach(n=>{ totals[n]={twd:0, items:[]}; });
+
+  splitItems.forEach(item=>{
+    const twd = toTWD(item.amt, item.cur);
+    const perHead = twd / item.who.length;
+    item.who.forEach(n=>{
+      if(totals[n]){
+        totals[n].twd += perHead;
+        totals[n].items.push({desc:item.desc, twd:perHead, orig:item.amt, cur:item.cur, count:item.who.length});
+      }
+    });
+  });
+
+  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1A4B8C';
+  const cur = splitCurrency;
+
+  wrap.innerHTML = Object.entries(totals).filter(([,v])=>v.twd>0).sort((a,b)=>b[1].twd-a[1].twd).map(([name,data])=>{
+    const m = MEMBERS[name];
+    const displayAmt = convertFromTWD(data.twd, cur);
+    const itemRows = data.items.map(it=>{
+      const disp = convertFromTWD(it.twd, cur);
+      return `<div class="result-item"><span class="result-item-desc">${it.desc} <span style="color:#AEAEB2">÷${it.count}</span></span><span class="result-item-amt">${fmtCur(disp,cur)}</span></div>`;
+    }).join('');
+    return `<div class="result-card">
+      <div class="result-hd" style="background:${m.color}12">
+        <div class="result-hd-name" style="color:${m.color}">${name}</div>
+        <div class="result-hd-total" style="color:${m.color}">${fmtCur(displayAmt,cur)}</div>
+      </div>
+      <div class="result-items">${itemRows}</div>
+    </div>`;
+  }).join('');
+
+  // Grand total
+  const grandTWD = Object.values(totals).reduce((s,v)=>s+v.twd,0);
+  const grandDisp = convertFromTWD(grandTWD, cur);
+  wrap.innerHTML += `<div style="background:var(--ink);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="color:#fff;font-size:13px;font-weight:700">總計</span><span style="color:#FFD234;font-size:18px;font-weight:900">${fmtCur(grandDisp,cur)}</span></div>`;
+}
+
+function editRates(){
+  const newTHB = prompt('1 THB = ? TWD（目前：'+rates.THB_TWD+'）', rates.THB_TWD);
+  if(newTHB && !isNaN(newTHB)) rates.THB_TWD = parseFloat(newTHB);
+  const newUSD = prompt('1 USD = ? TWD（目前：'+rates.USD_TWD+'）', rates.USD_TWD);
+  if(newUSD && !isNaN(newUSD)) rates.USD_TWD = parseFloat(newUSD);
+  document.getElementById('r-thb').textContent = '1 THB = '+rates.THB_TWD+' TWD';
+  document.getElementById('r-usd').textContent = '1 USD = '+rates.USD_TWD+' TWD';
+  renderResults();
+}
+
 buildPick();
 </script>
 </body>
