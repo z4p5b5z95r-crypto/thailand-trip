@@ -163,50 +163,181 @@ a{color:inherit;text-decoration:none}
 
 @media(max-width:380px){.pgrid{grid-template-columns:repeat(3,1fr)}}
 
-/* SPLIT */
-.split-wrap{max-width:680px;margin:0 auto}
-.split-card{background:var(--w);border-radius:16px;border:1px solid var(--g3);padding:16px;margin-bottom:10px}
-.split-card-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ink)}
-.split-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
-.split-input{flex:1;min-width:80px;padding:9px 11px;border:1.5px solid var(--g3);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
-.split-input:focus{border-color:var(--accent)}
-.split-select{padding:9px 11px;border:1.5px solid var(--g3);border-radius:10px;font-size:13px;font-family:inherit;background:var(--w);outline:none;cursor:pointer}
-.split-label{font-size:11px;font-weight:700;color:var(--mid);margin-bottom:4px;display:block}
-.split-who{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.split-who-btn{padding:5px 11px;border-radius:20px;border:1.5px solid var(--g3);font-size:11px;font-weight:700;cursor:pointer;background:var(--w);color:var(--mid);transition:all .15s;font-family:inherit}
-.split-who-btn.sel{color:#fff;border-color:transparent}
-.split-desc{width:100%;padding:9px 11px;border:1.5px solid var(--g3);border-radius:10px;font-size:13px;font-family:inherit;outline:none}
-.split-desc:focus{border-color:var(--accent)}
-.split-add-btn{width:100%;padding:11px;border-radius:12px;font-size:13px;font-weight:700;color:#fff;border:none;cursor:pointer;margin-top:4px;transition:opacity .15s}
-.split-add-btn:hover{opacity:.88}
-.split-list{margin-bottom:16px}
-.split-item{background:var(--w);border-radius:14px;border:1px solid var(--g3);padding:13px 15px;margin-bottom:8px;position:relative}
-.split-item-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-.split-item-desc{font-size:13px;font-weight:700;color:var(--ink)}
-.split-item-amt{font-size:14px;font-weight:900;color:var(--accent)}
-.split-item-who{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px}
-.split-item-del{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:var(--g4);border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
-.split-item-del:hover{background:#FFE5E5;color:#FF3B30}
-.split-item-note{font-size:10px;color:var(--mid)}
-.result-card{background:var(--w);border-radius:16px;border:1px solid var(--g3);overflow:hidden;margin-bottom:10px}
-.result-hd{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.result-hd-name{font-size:15px;font-weight:800}
-.result-hd-total{font-size:18px;font-weight:900}
-.result-items{border-top:1px solid var(--g4)}
-.result-item{padding:9px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--g4);font-size:11px}
-.result-item:last-child{border-bottom:none}
-.result-item-desc{color:var(--mid);flex:1;margin-right:8px}
-.result-item-amt{font-weight:700;color:var(--ink);flex-shrink:0}
-.rate-bar{background:var(--g4);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.rate-item{font-size:11px;color:var(--mid)}
-.rate-item b{color:var(--ink);font-weight:700}
-.rate-edit{font-size:10px;color:var(--accent);cursor:pointer;font-weight:700}
-.currency-tabs{display:flex;gap:6px;margin-bottom:16px}
-.ctab{padding:5px 14px;border-radius:20px;border:1.5px solid var(--g3);font-size:11px;font-weight:700;cursor:pointer;background:var(--w);color:var(--mid);font-family:inherit;transition:all .15s}
-.ctab.on{color:#fff;border-color:transparent}
+
+/* ══ SPLIT ══ */
+#sec-split{padding-bottom:80px}
+.sp-hero{background:linear-gradient(135deg,#1D1D1F,#2C2C2E);border-radius:20px;padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden}
+.sp-hero::before{content:'💰';position:absolute;right:-10px;top:-10px;font-size:80px;opacity:.08}
+.sp-hero-title{font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:6px}
+.sp-hero-rate{font-size:13px;color:rgba(255,255,255,.7);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.sp-hero-rate b{color:#FFD234}
+.sp-rate-btn{background:rgba(255,255,255,.12);border:none;color:#FFD234;font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;cursor:pointer;font-family:inherit}
+.sp-rate-status{font-size:9px;color:rgba(255,255,255,.35);margin-top:6px}
+
+/* FAB add button */
+.sp-fab{position:fixed;bottom:80px;right:18px;z-index:150;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 20px rgba(0,0,0,.25);border:none;cursor:pointer;transition:transform .15s}
+.sp-fab:hover{transform:scale(1.08)}
+
+/* Drawer */
+.sp-drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px)}
+.sp-drawer-bg.show{opacity:1;pointer-events:all}
+.sp-drawer{position:fixed;bottom:0;left:0;right:0;z-index:301;background:#fff;border-radius:24px 24px 0 0;padding:0 0 40px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,0,.15,1);max-height:92vh;overflow-y:auto}
+.sp-drawer.show{transform:translateY(0)}
+.sp-drawer-handle{width:36px;height:4px;border-radius:2px;background:#E5E5EA;margin:12px auto 0}
+.sp-drawer-hd{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between}
+.sp-drawer-title{font-size:17px;font-weight:800}
+.sp-drawer-close{width:28px;height:28px;border-radius:50%;background:#F2F2F7;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.sp-body{padding:16px 18px}
+
+/* Category */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.cat-btn{border:1.5px solid #E5E5EA;border-radius:14px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;background:#fff;transition:all .15s;font-family:inherit}
+.cat-btn.sel{border-color:var(--accent);background:var(--accent)12}
+.cat-btn:hover{border-color:#AEAEB2}
+.cat-icon{font-size:22px;line-height:1}
+.cat-lbl{font-size:10px;font-weight:600;color:#6E6E73}
+.cat-btn.sel .cat-lbl{color:var(--accent);font-weight:700}
+
+/* Input */
+.sp-field{margin-bottom:14px}
+.sp-field label{font-size:11px;font-weight:700;color:#6E6E73;display:block;margin-bottom:6px;letter-spacing:.3px}
+.sp-input{width:100%;padding:12px 14px;border:1.5px solid #E5E5EA;border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:border-color .15s;background:#fff}
+.sp-input:focus{border-color:var(--accent)}
+.sp-amt-row{display:flex;gap:8px}
+.sp-amt-row .sp-input{flex:1}
+.sp-cur-btns{display:flex;gap:6px}
+.sp-cur-btn{flex:1;padding:12px 6px;border:1.5px solid #E5E5EA;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;font-family:inherit;transition:all .15s;text-align:center}
+.sp-cur-btn.sel{color:#fff;border-color:transparent}
+
+/* Who chips */
+.sp-who-row{display:flex;gap:6px;flex-wrap:wrap}
+.sp-m-btn{padding:7px 12px;border-radius:20px;border:1.5px solid #E5E5EA;font-size:12px;font-weight:700;cursor:pointer;background:#fff;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.sp-m-btn.sel{color:#fff;border-color:transparent}
+.sp-m-btn .dot{width:7px;height:7px;border-radius:50%}
+
+/* Payer */
+.sp-payer-row{display:flex;gap:6px;flex-wrap:wrap}
+.sp-payer-btn{padding:7px 12px;border-radius:20px;border:1.5px solid #E5E5EA;font-size:12px;font-weight:600;cursor:pointer;background:#fff;font-family:inherit;transition:all .15s}
+.sp-payer-btn.sel{color:#fff;border-color:transparent}
+
+/* Receipt */
+.sp-receipt-area{border:2px dashed #E5E5EA;border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:border-color .15s}
+.sp-receipt-area:hover{border-color:#AEAEB2}
+.sp-receipt-area.has-img{border-style:solid;border-color:#E5E5EA}
+.sp-receipt-preview{max-width:100%;max-height:120px;border-radius:8px;object-fit:cover}
+.sp-receipt-label{font-size:12px;color:#AEAEB2;margin-top:6px}
+
+/* Submit */
+.sp-submit{width:100%;padding:15px;border-radius:14px;font-size:16px;font-weight:700;color:#fff;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s;margin-top:4px}
+.sp-submit:active{opacity:.85}
+
+/* Item list */
+.sp-items-wrap{margin-bottom:20px}
+.sp-date-group{margin-bottom:4px}
+.sp-date-hd{font-size:11px;font-weight:700;color:#AEAEB2;letter-spacing:.5px;padding:14px 0 6px}
+.sp-item{background:#fff;border-radius:14px;border:1px solid #E5E5EA;padding:13px 14px;margin-bottom:7px;cursor:pointer;transition:box-shadow .15s;position:relative}
+.sp-item:hover{box-shadow:0 2px 12px rgba(0,0,0,.07)}
+.sp-item-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sp-item-cat{font-size:18px;width:32px;height:32px;border-radius:10px;background:#F5F5F7;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sp-item-mid{flex:1;min-width:0}
+.sp-item-desc{font-size:13px;font-weight:700;color:#1D1D1F}
+.sp-item-meta{font-size:10px;color:#AEAEB2;margin-top:1px}
+.sp-item-amt{font-size:14px;font-weight:900;text-align:right;flex-shrink:0}
+.sp-item-per{font-size:9px;color:#AEAEB2;text-align:right}
+.sp-item-who{display:flex;gap:3px;flex-wrap:wrap}
+.sp-item-del{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:#F2F2F7;border:none;cursor:pointer;font-size:11px;color:#AEAEB2;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.sp-item:hover .sp-item-del{opacity:1}
+.sp-img-thumb{width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid #E5E5EA;flex-shrink:0}
+
+/* Results */
+.sp-results-wrap{}
+.sp-view-tabs{display:flex;gap:6px;margin-bottom:14px;background:#F2F2F7;padding:3px;border-radius:12px}
+.sp-vtab{flex:1;padding:8px 4px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;border:none;font-family:inherit;color:#6E6E73;transition:all .2s;text-align:center}
+.sp-vtab.on{background:#fff;color:#1D1D1F;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* Summary view */
+.sp-sum-card{background:#fff;border-radius:16px;border:1px solid #E5E5EA;overflow:hidden;margin-bottom:8px}
+.sp-sum-hd{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.sp-sum-name{font-size:14px;font-weight:800}
+.sp-sum-amt{font-size:18px;font-weight:900}
+.sp-sum-body{border-top:1px solid #F5F5F7}
+.sp-sum-row{padding:9px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #F5F5F7;font-size:11px}
+.sp-sum-row:last-child{border-bottom:none}
+.sp-sum-desc{color:#6E6E73;flex:1;margin-right:8px}
+.sp-sum-val{font-weight:700;color:#1D1D1F;flex-shrink:0}
+
+/* Settle view */
+.sp-settle-card{background:#fff;border-radius:16px;border:1px solid #E5E5EA;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.sp-settle-arrow{font-size:18px;color:#AEAEB2;flex-shrink:0}
+.sp-settle-info{flex:1}
+.sp-settle-text{font-size:13px;font-weight:700;color:#1D1D1F}
+.sp-settle-sub{font-size:10px;color:#AEAEB2;margin-top:2px}
+.sp-settle-amt{font-size:16px;font-weight:900;flex-shrink:0}
+
+/* Grand total bar */
+.sp-grand{background:#1D1D1F;border-radius:14px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sp-grand-lbl{color:rgba(255,255,255,.6);font-size:12px;font-weight:600}
+.sp-grand-amt{color:#FFD234;font-size:20px;font-weight:900}
+
+/* Detail modal */
+.sp-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
+.sp-modal-bg.show{display:flex}
+.sp-modal{background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 48px;width:100%;max-height:80vh;overflow-y:auto}
+.sp-modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sp-modal-title{font-size:17px;font-weight:800}
+.sp-modal-close{width:28px;height:28px;border-radius:50%;background:#F2F2F7;border:none;cursor:pointer;font-size:14px}
+
+
+/* ── ACCOUNT ── */
+.acct-screen{position:fixed;inset:0;z-index:500;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;transition:opacity .3s}
+.acct-screen.gone{opacity:0;pointer-events:none}
+.acct-top{text-align:center;margin-bottom:32px}
+.acct-emoji{font-size:48px;margin-bottom:12px}
+.acct-title{font-size:24px;font-weight:900;color:#1D1D1F;margin-bottom:6px}
+.acct-sub{font-size:14px;color:#6E6E73}
+.acct-avatar-wrap{position:relative;width:90px;height:90px;margin:0 auto 20px;cursor:pointer}
+.acct-avatar{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #E5E5EA}
+.acct-avatar-edit{position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:#1D1D1F;display:flex;align-items:center;justify-content:center;font-size:13px}
+.acct-name-input{width:100%;padding:14px 16px;border:1.5px solid #E5E5EA;border-radius:14px;font-size:16px;font-family:inherit;outline:none;text-align:center;margin-bottom:16px;transition:border-color .15s}
+.acct-name-input:focus{border-color:#1D1D1F}
+.acct-member-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;margin-bottom:20px}
+.acct-m-btn{border:1.5px solid #E5E5EA;border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;background:#fff;transition:all .15s;font-family:inherit}
+.acct-m-btn.sel{border-width:2px}
+.acct-m-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:900}
+.acct-m-name{font-size:11px;font-weight:700;color:#1D1D1F}
+.acct-save-btn{width:100%;padding:15px;border-radius:16px;font-size:16px;font-weight:700;color:#fff;border:none;cursor:pointer;font-family:inherit;background:#1D1D1F}
+
+/* Profile badge in hero */
+.profile-badge{position:absolute;top:12px;right:12px;z-index:3;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.18);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 12px 5px 5px;cursor:pointer}
+.profile-badge-av{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.4)}
+.profile-badge-name{font-size:12px;font-weight:700;color:#fff}
+
 </style>
 </head>
 <body>
+
+<!-- ACCOUNT SETUP SCREEN -->
+<div class="acct-screen" id="acct-screen">
+  <div class="acct-top">
+    <div class="acct-emoji">🇹🇭</div>
+    <div class="acct-title">歡迎！第一次來嗎？</div>
+    <div class="acct-sub">設定你的帳號，以後打開不用再選</div>
+  </div>
+  <div class="acct-avatar-wrap" onclick="document.getElementById('acct-file').click()">
+    <img id="acct-av-img" class="acct-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23E5E5EA'/%3E%3Ctext x='50' y='62' text-anchor='middle' font-size='36' fill='%23AEAEB2'%3E😊%3C/text%3E%3C/svg%3E">
+    <div class="acct-avatar-edit">📷</div>
+  </div>
+  <input type="file" id="acct-file" accept="image/*" style="display:none" onchange="acctUploadPhoto(this)">
+  <input class="acct-name-input" id="acct-name" placeholder="輸入你的名字（可用暱稱）" maxlength="6">
+  <div style="font-size:11px;font-weight:700;color:#6E6E73;margin-bottom:10px;text-align:center;letter-spacing:.5px">你是哪位成員？</div>
+  <div class="acct-member-grid" id="acct-member-grid"></div>
+  <button class="acct-save-btn" onclick="saveAccount()">完成設定，進入行程 →</button>
+</div>
+
+<!-- PROFILE EDIT MODAL -->
+<div class="sp-modal-bg" id="profile-modal-bg" onclick="closeProfileModal()">
+  <div class="sp-modal" onclick="event.stopPropagation()" id="profile-modal"></div>
+</div>
 
 <div id="pick">
   <div class="psun"></div>
@@ -250,7 +381,7 @@ a{color:inherit;text-decoration:none}
   <div class="sec" id="sec-food"></div>
 </div>
   <div class="sec" id="sec-split"></div>
-<button class="chbtn" id="chbtn" style="display:none" onclick="showPick()">👤 換人</button>
+<button class="chbtn" id="chbtn" style="display:none" onclick="openProfileModal()">👤 帳號</button>
 
 <script>
 const CM='#C4522A',BK='#1A4B8C',KR='#1A7A52',GOLD='#C49A28';
@@ -552,6 +683,7 @@ function buildHero(){
   document.getElementById('hnote').textContent=isAll?'全員行程總覽 · 7 人・3 城市・22 天':m.note;
   const kpis=isAll?[['22','天行程'],['7','人同遊'],['3','城市']]:m.kpis;
   document.getElementById('hkpis').innerHTML=kpis.map(([n,l])=>`<div class="kpi"><div class="kpin">${n}</div><div class="kpil">${l}</div></div>`).join('');
+  setTimeout(showProfileBadge,100);
 }
 
 function buildMyDays(){
@@ -633,269 +765,765 @@ function goTab(btn){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function toggleDay(id){document.getElementById('dc-'+id).classList.toggle('open');}
-// ── SPLIT ──
-let splitItems = [];
-let splitCurrency = 'TWD';
 
-const RATES_DEFAULT = {THB_TWD: 0.87, USD_TWD: 32.5, THB_USD: 0.027};
-let rates = {...RATES_DEFAULT};
+// ══ SPLIT ══
+let SP = {
+  items: [],       // {id,cat,desc,amt,cur,who,payer,time,addedBy,receipt}
+  view: 'summary', // summary | detail | settle
+  currency: 'TWD',
+  rates: {THB_TWD: 0.87, USD_TWD: 32.5},
+  ratesFetched: false,
+  editId: null,
+  selectedCat: null,
+  selectedWho: [],
+  selectedPayer: null,
+  selectedCur: 'THB',
+};
 
-function toTWD(amount, currency){
-  if(currency==='TWD') return amount;
-  if(currency==='THB') return amount * rates.THB_TWD;
-  if(currency==='USD') return amount * rates.USD_TWD;
-  return amount;
+const CATS = [
+  {id:'meal',   icon:'🍽', label:'正餐'},
+  {id:'snack',  icon:'🧁', label:'點心'},
+  {id:'coffee', icon:'☕', label:'咖啡'},
+  {id:'drink',  icon:'🍻', label:'酒水'},
+  {id:'trans',  icon:'🚕', label:'交通'},
+  {id:'sight',  icon:'🎟', label:'景點'},
+  {id:'shop',   icon:'🛍', label:'購物'},
+  {id:'massage',icon:'💆', label:'按摩'},
+  {id:'other',  icon:'📦', label:'其他'},
+];
+
+function getCatIcon(id){ return CATS.find(c=>c.id===id)?.icon || '📦'; }
+function getCatLabel(id){ return CATS.find(c=>c.id===id)?.label || '其他'; }
+
+function toTWD(amt, cur){
+  if(cur==='TWD') return amt;
+  if(cur==='THB') return amt * SP.rates.THB_TWD;
+  if(cur==='USD') return amt * SP.rates.USD_TWD;
+  return amt;
 }
-
-function fmtTWD(n){ return 'TWD ' + Math.round(n).toLocaleString(); }
-function fmtAmt(n, cur){
-  if(cur==='THB') return 'THB ' + n.toLocaleString();
-  if(cur==='USD') return 'USD ' + n.toFixed(2);
-  return 'TWD ' + n.toLocaleString();
-}
-
-function buildSplit(){
-  const sec = document.getElementById('sec-split');
-  sec.innerHTML = `
-    <div class="sh2">💰 分帳計算</div>
-    <div class="rate-bar" id="rate-bar">
-      <span class="rate-item">匯率：<b id="r-thb">1 THB = ${rates.THB_TWD} TWD</b></span>
-      <span class="rate-item"><b id="r-usd">1 USD = ${rates.USD_TWD} TWD</b></span>
-      <span class="rate-edit" onclick="editRates()">✏️ 調整匯率</span>
-    </div>
-
-    <!-- Add expense card -->
-    <div class="split-card">
-      <div class="split-card-title">➕ 新增費用</div>
-      <label class="split-label">說明</label>
-      <input class="split-input split-desc" id="sp-desc" placeholder="例：Copper 自助餐" style="width:100%;margin-bottom:10px">
-      <div class="split-row">
-        <div style="flex:2;min-width:100px">
-          <label class="split-label">金額</label>
-          <input class="split-input" id="sp-amt" type="number" placeholder="0" style="width:100%">
-        </div>
-        <div>
-          <label class="split-label">幣別</label>
-          <select class="split-select" id="sp-cur">
-            <option value="TWD">TWD 台幣</option>
-            <option value="THB">THB 泰銖</option>
-            <option value="USD">USD 美金</option>
-          </select>
-        </div>
-      </div>
-      <label class="split-label">誰要分？（點選）</label>
-      <div class="split-who" id="sp-who"></div>
-      <button class="split-add-btn" id="sp-add-btn" onclick="addSplitItem()">新增這筆費用</button>
-    </div>
-
-    <!-- Items list -->
-    <div id="sp-list"></div>
-
-    <!-- Results -->
-    <div class="sh2" style="margin-top:8px">📊 結算總覽</div>
-    <div class="currency-tabs">
-      <button class="ctab on" id="ctab-TWD" onclick="setCur('TWD',this)">TWD 台幣</button>
-      <button class="ctab" id="ctab-THB" onclick="setCur('THB',this)">THB 泰銖</button>
-      <button class="ctab" id="ctab-USD" onclick="setCur('USD',this)">USD 美金</button>
-    </div>
-    <div id="sp-results"></div>
-  `;
-
-  // Build who buttons
-  const whoWrap = document.getElementById('sp-who');
-  const allBtn = document.createElement('button');
-  allBtn.className='split-who-btn sel';
-  allBtn.textContent='全選';
-  allBtn.style.background='#555';
-  allBtn.dataset.name='__all__';
-  allBtn.onclick=()=>toggleAllWho();
-  whoWrap.appendChild(allBtn);
-
-  Object.entries(MEMBERS).forEach(([name,m])=>{
-    const b = document.createElement('button');
-    b.className='split-who-btn sel';
-    b.textContent=name;
-    b.style.background=m.color;
-    b.style.borderColor=m.color;
-    b.dataset.name=name;
-    b.onclick=()=>toggleWho(b,name,m.color);
-    whoWrap.appendChild(b);
-  });
-
-  // Set add button color
-  document.getElementById('sp-add-btn').style.background=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1A4B8C';
-
-  renderList();
-  renderResults();
-}
-
-function toggleWho(btn, name, color){
-  if(btn.classList.contains('sel')){
-    btn.classList.remove('sel');
-    btn.style.background='';
-    btn.style.borderColor='';
-    btn.style.color='';
-  } else {
-    btn.classList.add('sel');
-    btn.style.background=color;
-    btn.style.borderColor=color;
-    btn.style.color='#fff';
-  }
-  updateAllBtn();
-}
-
-function toggleAllWho(){
-  const allBtn = document.querySelector('#sp-who [data-name="__all__"]');
-  const memberBtns = document.querySelectorAll('#sp-who [data-name]:not([data-name="__all__"])');
-  const allSel = allBtn.classList.contains('sel');
-  if(allSel){
-    // deselect all
-    memberBtns.forEach(b=>{b.classList.remove('sel');b.style.background='';b.style.borderColor='';b.style.color='';});
-    allBtn.classList.remove('sel'); allBtn.style.background=''; allBtn.style.color='';
-  } else {
-    // select all
-    memberBtns.forEach(b=>{
-      const name=b.dataset.name; const color=MEMBERS[name]?.color;
-      b.classList.add('sel'); b.style.background=color; b.style.borderColor=color; b.style.color='#fff';
-    });
-    allBtn.classList.add('sel'); allBtn.style.background='#555'; allBtn.style.color='#fff';
-  }
-}
-
-function updateAllBtn(){
-  const allBtn = document.querySelector('#sp-who [data-name="__all__"]');
-  if(!allBtn) return;
-  const memberBtns = document.querySelectorAll('#sp-who [data-name]:not([data-name="__all__"])');
-  const allSel = [...memberBtns].every(b=>b.classList.contains('sel'));
-  if(allSel){ allBtn.classList.add('sel'); allBtn.style.background='#555'; allBtn.style.color='#fff'; }
-  else { allBtn.classList.remove('sel'); allBtn.style.background=''; allBtn.style.color=''; }
-}
-
-function getSelectedWho(){
-  return [...document.querySelectorAll('#sp-who [data-name]:not([data-name="__all__"])')].filter(b=>b.classList.contains('sel')).map(b=>b.dataset.name);
-}
-
-function addSplitItem(){
-  const desc = document.getElementById('sp-desc').value.trim();
-  const amt = parseFloat(document.getElementById('sp-amt').value);
-  const cur = document.getElementById('sp-cur').value;
-  const who = getSelectedWho();
-  if(!desc){ alert('請填寫說明！'); return; }
-  if(!amt || amt<=0){ alert('請填寫金額！'); return; }
-  if(who.length===0){ alert('請選擇分帳的人！'); return; }
-  splitItems.push({id:Date.now(), desc, amt, cur, who});
-  document.getElementById('sp-desc').value='';
-  document.getElementById('sp-amt').value='';
-  renderList();
-  renderResults();
-}
-
-function deleteSplitItem(id){
-  splitItems = splitItems.filter(i=>i.id!==id);
-  renderList();
-  renderResults();
-}
-
-function renderList(){
-  const wrap = document.getElementById('sp-list');
-  if(!wrap) return;
-  if(splitItems.length===0){
-    wrap.innerHTML='<div style="text-align:center;padding:20px;color:var(--mid);font-size:13px">還沒有任何費用，新增第一筆吧！</div>';
-    return;
-  }
-  wrap.innerHTML = splitItems.map(item=>{
-    const whoTags = item.who.map(n=>{const c=MEMBERS[n]?.color||'#888';return`<span class="who-tag" style="color:${c};background:${c}18;border-color:${c}38">${n}</span>`;}).join('');
-    const perHead = toTWD(item.amt, item.cur) / item.who.length;
-    return `<div class="split-item">
-      <button class="split-item-del" onclick="deleteSplitItem(${item.id})">✕</button>
-      <div class="split-item-top">
-        <div class="split-item-desc">${item.desc}</div>
-        <div class="split-item-amt">${fmtAmt(item.amt, item.cur)}</div>
-      </div>
-      <div class="split-item-who">${whoTags}</div>
-      <div class="split-item-note">每人 ${fmtTWD(perHead)} · 共 ${item.who.length} 人分</div>
-    </div>`;
-  }).join('');
-}
-
-function setCur(cur, btn){
-  splitCurrency = cur;
-  document.querySelectorAll('.ctab').forEach(b=>{b.classList.remove('on');b.style.background='';b.style.color='';b.style.borderColor='';});
-  btn.classList.add('on');
-  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1A4B8C';
-  btn.style.background=ac; btn.style.color='#fff'; btn.style.borderColor=ac;
-  renderResults();
-}
-
-function convertFromTWD(twd, cur){
+function fromTWD(twd, cur){
   if(cur==='TWD') return twd;
-  if(cur==='THB') return twd / rates.THB_TWD;
-  if(cur==='USD') return twd / rates.USD_TWD;
+  if(cur==='THB') return twd / SP.rates.THB_TWD;
+  if(cur==='USD') return twd / SP.rates.USD_TWD;
   return twd;
 }
-
-function fmtCur(n, cur){
+function fmt(n, cur){
   if(cur==='THB') return 'THB ' + Math.round(n).toLocaleString();
   if(cur==='USD') return 'USD ' + n.toFixed(2);
   return 'TWD ' + Math.round(n).toLocaleString();
 }
+function fmtTWD(n){ return 'TWD ' + Math.round(n).toLocaleString(); }
 
-function renderResults(){
-  const wrap = document.getElementById('sp-results');
-  if(!wrap) return;
-  if(splitItems.length===0){ wrap.innerHTML='<div style="text-align:center;padding:16px;color:var(--mid);font-size:13px">新增費用後這裡會顯示每人應付金額</div>'; return; }
-
-  // Calculate per person
-  const totals = {}; // name → {twd, items:[{desc,twd}]}
-  Object.keys(MEMBERS).forEach(n=>{ totals[n]={twd:0, items:[]}; });
-
-  splitItems.forEach(item=>{
-    const twd = toTWD(item.amt, item.cur);
-    const perHead = twd / item.who.length;
-    item.who.forEach(n=>{
-      if(totals[n]){
-        totals[n].twd += perHead;
-        totals[n].items.push({desc:item.desc, twd:perHead, orig:item.amt, cur:item.cur, count:item.who.length});
+// Fetch real exchange rate from Taiwan Bank via CORS proxy
+async function fetchRates(){
+  // Try multiple sources - Taiwan Bank doesn't allow direct CORS
+  const sources = [
+    // Source 1: exchangerate-api (free, reliable)
+    async () => {
+      const r = await fetch('https://api.exchangerate-api.com/v4/latest/TWD');
+      const d = await r.json();
+      return { THB_TWD: Math.round((1/d.rates.THB)*1000)/1000, USD_TWD: Math.round((1/d.rates.USD)*100)/100 };
+    },
+    // Source 2: frankfurter (ECB based)
+    async () => {
+      const r = await fetch('https://api.frankfurter.app/latest?from=TWD&to=THB,USD');
+      const d = await r.json();
+      return { THB_TWD: Math.round((1/d.rates.THB)*1000)/1000, USD_TWD: Math.round((1/d.rates.USD)*100)/100 };
+    },
+  ];
+  for(const src of sources){
+    try {
+      const rates = await src();
+      if(rates.THB_TWD > 0 && rates.USD_TWD > 0){
+        SP.rates.THB_TWD = rates.THB_TWD;
+        SP.rates.USD_TWD = rates.USD_TWD;
+        SP.ratesFetched = true;
+        renderRateBar();
+        return;
       }
-    });
+    } catch(e){ continue; }
+  }
+  // fallback: keep defaults, show note
+}
+
+function renderRateBar(){
+  const rateHtml = `<span>匯率：</span><b>1 THB = ${SP.rates.THB_TWD} TWD</b><span style="margin:0 4px">·</span><b>1 USD = ${SP.rates.USD_TWD} TWD</b><button class="sp-rate-btn" style="background:#E5E5EA;color:#1D1D1F;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:700;border:none;cursor:pointer;font-family:inherit" onclick="manualRate()">✏️ 手動調整</button><div style="width:100%;font-size:9px;color:#AEAEB2;margin-top:2px">${SP.ratesFetched?'✓ 即時匯率':'預設匯率'}</div>`;
+  const d = document.getElementById('sp-rate-bar-drawer');
+  if(d) d.innerHTML = rateHtml;
+}
+
+function manualRate(){
+  const t = prompt('1 THB = ? TWD（目前：'+SP.rates.THB_TWD+'）', SP.rates.THB_TWD);
+  if(t && !isNaN(t)) SP.rates.THB_TWD = parseFloat(t);
+  const u = prompt('1 USD = ? TWD（目前：'+SP.rates.USD_TWD+'）', SP.rates.USD_TWD);
+  if(u && !isNaN(u)) SP.rates.USD_TWD = parseFloat(u);
+  renderRateBar();
+  renderSPResults();
+}
+
+function buildSplit(){
+  const sec = document.getElementById('sec-split');
+  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C4522A';
+  sec.innerHTML = `
+    <!-- Item list -->
+    <div class="sp-items-wrap" id="sp-items-wrap">
+      <div style="text-align:center;padding:16px 0 8px">
+        <div style="font-size:36px;margin-bottom:8px">🧾</div>
+        <div style="font-size:14px;font-weight:700;color:#1D1D1F;margin-bottom:3px">還沒有任何費用</div>
+        <div style="font-size:12px;color:#AEAEB2">點右下角 ＋ 新增第一筆</div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="sh2">📊 結算總覽</div>
+    <div class="sp-view-tabs">
+      <button class="sp-vtab on" onclick="setSPView('summary',this)">總覽</button>
+      <button class="sp-vtab" onclick="setSPView('detail',this)">個人明細</button>
+      <button class="sp-vtab" onclick="setSPView('settle',this)">誰欠誰</button>
+    </div>
+    <div id="sp-results-wrap"></div>
+
+    <!-- FAB -->
+    <button class="sp-fab" style="background:${ac}" onclick="openDrawer()">＋</button>
+
+    <!-- Drawer -->
+    <div class="sp-drawer-bg" id="sp-drawer-bg" onclick="closeDrawer()"></div>
+    <div class="sp-drawer" id="sp-drawer">
+      <div class="sp-drawer-handle"></div>
+      <div class="sp-drawer-hd">
+        <div class="sp-drawer-title">新增費用</div>
+        <button class="sp-drawer-close" onclick="closeDrawer()">✕</button>
+      </div>
+      <div class="sp-body">
+        <!-- Rate (compact) -->
+        <div style="background:#F5F5F7;border-radius:12px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+          <div>
+            <div style="font-size:11px;color:#6E6E73">匯率：<b id="sp-rate-thb" style="color:#1D1D1F">1 THB = 0.87 TWD</b> &nbsp;<b id="sp-rate-usd" style="color:#1D1D1F">1 USD = 32.5 TWD</b></div>
+            <div id="sp-rate-src" style="font-size:9px;color:#AEAEB2;margin-top:2px">預設值，可手動調整</div>
+          </div>
+          <button onclick="manualRate()" style="padding:4px 10px;border-radius:10px;border:1px solid #E5E5EA;background:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:#6E6E73;flex-shrink:0">✏️ 調整</button>
+        </div>
+        <!-- Category -->
+        <div class="sp-field">
+          <label>消費類型</label>
+          <div class="cat-grid" id="sp-cats"></div>
+        </div>
+        <!-- Desc -->
+        <div class="sp-field">
+          <label>說明</label>
+          <input class="sp-input" id="sp-desc" placeholder="例：Copper 自助餐午餐" autocomplete="off">
+        </div>
+        <!-- Amount + currency -->
+        <div class="sp-field">
+          <label>金額與幣別</label>
+          <div class="sp-amt-row" style="margin-bottom:8px">
+            <input class="sp-input" id="sp-amt" type="number" inputmode="decimal" placeholder="0">
+          </div>
+          <div class="sp-cur-btns" id="sp-cur-btns"></div>
+        </div>
+        <!-- Payer -->
+        <div class="sp-field">
+          <label>付款人</label>
+          <div class="sp-payer-row" id="sp-payer-row"></div>
+        </div>
+        <!-- Who splits -->
+        <div class="sp-field">
+          <label>誰要分帳</label>
+          <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+            <button style="padding:5px 10px;border-radius:14px;border:1px solid #E5E5EA;font-size:11px;font-weight:700;cursor:pointer;background:#F5F5F7;font-family:inherit" onclick="spSelectAll()">全選</button>
+            <button style="padding:5px 10px;border-radius:14px;border:1px solid #E5E5EA;font-size:11px;font-weight:700;cursor:pointer;background:#F5F5F7;font-family:inherit" onclick="spClearAll()">全不選</button>
+          </div>
+          <div class="sp-who-row" id="sp-who-row"></div>
+        </div>
+        <!-- Receipt -->
+        <div class="sp-field">
+          <label>收據（選填）</label>
+          <div class="sp-receipt-area" id="sp-receipt-area" onclick="document.getElementById('sp-file').click()">
+            <div id="sp-receipt-preview-wrap">
+              <div style="font-size:24px;margin-bottom:4px">📷</div>
+              <div class="sp-receipt-label">點擊上傳收據照片</div>
+            </div>
+          </div>
+          <input type="file" id="sp-file" accept="image/*" style="display:none" onchange="handleReceipt(this)">
+        </div>
+        <!-- Rate bar in drawer -->
+        <div id="sp-rate-bar-drawer" style="background:#F5F5F7;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:11px;color:#6E6E73"></div>
+        <!-- Submit -->
+        <button class="sp-submit" id="sp-submit-btn" style="background:${ac}" onclick="submitSP()">新增這筆費用</button>
+      </div>
+    </div>
+
+    <!-- Detail modal -->
+    <div class="sp-modal-bg" id="sp-modal-bg" onclick="closeModal()">
+      <div class="sp-modal" onclick="event.stopPropagation()" id="sp-modal"></div>
+    </div>
+  `;
+
+  buildCats();
+  buildCurBtns();
+  buildPayerRow();
+  buildWhoRow();
+  renderSPList();
+  renderSPResults();
+  fetchRates();
+}
+
+function buildCats(){
+  const wrap = document.getElementById('sp-cats');
+  wrap.innerHTML = CATS.map(c=>`
+    <button class="cat-btn" data-id="${c.id}" onclick="selectCat('${c.id}')">
+      <span class="cat-icon">${c.icon}</span>
+      <span class="cat-lbl">${c.label}</span>
+    </button>`).join('');
+}
+
+function selectCat(id){
+  SP.selectedCat = id;
+  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  document.querySelectorAll('.cat-btn').forEach(b=>{
+    const s = b.dataset.id===id;
+    b.classList.toggle('sel',s);
+    b.style.borderColor = s?ac:'';
+    b.style.background = s?ac+'18':'';
+    b.querySelector('.cat-lbl').style.color = s?ac:'';
+  });
+}
+
+function buildCurBtns(){
+  const wrap = document.getElementById('sp-cur-btns');
+  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  ['THB','TWD','USD'].forEach(c=>{
+    const b = document.createElement('button');
+    b.className='sp-cur-btn'+(c==='THB'?' sel':'');
+    b.textContent = c==='THB'?'🇹🇭 THB':c==='TWD'?'🇹🇼 TWD':'🇺🇸 USD';
+    b.onclick=()=>{
+      SP.selectedCur=c;
+      document.querySelectorAll('.sp-cur-btn').forEach(x=>{x.classList.remove('sel');x.style.background='';x.style.color='';});
+      b.classList.add('sel'); b.style.background=ac; b.style.color='#fff';
+    };
+    if(c==='THB'){b.style.background=ac;b.style.color='#fff';}
+    wrap.appendChild(b);
+  });
+}
+
+function buildPayerRow(){
+  const wrap = document.getElementById('sp-payer-row');
+  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  Object.entries(MEMBERS).forEach(([name,m])=>{
+    const b = document.createElement('button');
+    b.className='sp-payer-btn'; b.textContent=name; b.dataset.name=name;
+    b.onclick=()=>{
+      SP.selectedPayer=name;
+      document.querySelectorAll('.sp-payer-btn').forEach(x=>{x.classList.remove('sel');x.style.background='';x.style.color='';x.style.borderColor='';});
+      b.classList.add('sel'); b.style.background=m.color; b.style.color='#fff'; b.style.borderColor=m.color;
+    };
+    wrap.appendChild(b);
+  });
+}
+
+function buildWhoRow(){
+  const wrap = document.getElementById('sp-who-row');
+  SP.selectedWho = [];
+  Object.entries(MEMBERS).forEach(([name,m])=>{
+    const b = document.createElement('button');
+    b.className='sp-m-btn'; b.dataset.name=name;
+    b.innerHTML=`<span class="dot" style="background:${m.color}"></span>${name}`;
+    b.onclick=()=>{
+      if(b.classList.contains('sel')){
+        b.classList.remove('sel'); b.style.background=''; b.style.color=''; b.style.borderColor='';
+        SP.selectedWho = SP.selectedWho.filter(n=>n!==name);
+      } else {
+        b.classList.add('sel'); b.style.background=m.color; b.style.borderColor=m.color; b.style.color='#fff';
+        SP.selectedWho.push(name);
+      }
+    };
+    wrap.appendChild(b);
+  });
+}
+
+function spSelectAll(){
+  SP.selectedWho = Object.keys(MEMBERS);
+  document.querySelectorAll('.sp-m-btn').forEach(b=>{
+    const m = MEMBERS[b.dataset.name];
+    b.classList.add('sel'); b.style.background=m.color; b.style.borderColor=m.color; b.style.color='#fff';
+  });
+}
+function spClearAll(){
+  SP.selectedWho = [];
+  document.querySelectorAll('.sp-m-btn').forEach(b=>{
+    b.classList.remove('sel'); b.style.background=''; b.style.borderColor=''; b.style.color='';
+  });
+}
+
+let receiptBase64 = null;
+function handleReceipt(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    receiptBase64 = e.target.result;
+    document.getElementById('sp-receipt-preview-wrap').innerHTML=`<img src="${receiptBase64}" class="sp-receipt-preview">`;
+    document.getElementById('sp-receipt-area').classList.add('has-img');
+  };
+  reader.readAsDataURL(file);
+}
+
+function openDrawer(){
+  document.getElementById('sp-drawer-bg').classList.add('show');
+  document.getElementById('sp-drawer').classList.add('show');
+  renderRateBar();
+  // reset
+  SP.selectedCat=null; SP.selectedCur='THB'; SP.selectedPayer=null;
+  receiptBase64=null;
+  document.querySelectorAll('.cat-btn').forEach(b=>{b.classList.remove('sel');b.style.borderColor='';b.style.background='';b.querySelector('.cat-lbl').style.color='';});
+  document.querySelectorAll('.sp-cur-btn').forEach(b=>{b.classList.remove('sel');b.style.background='';b.style.color='';});
+  const ac=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  document.querySelector('.sp-cur-btn').classList.add('sel');
+  document.querySelector('.sp-cur-btn').style.background=ac;
+  document.querySelector('.sp-cur-btn').style.color='#fff';
+  document.querySelectorAll('.sp-payer-btn').forEach(b=>{b.classList.remove('sel');b.style.background='';b.style.color='';b.style.borderColor='';});
+  document.getElementById('sp-desc').value='';
+  document.getElementById('sp-amt').value='';
+  document.getElementById('sp-receipt-preview-wrap').innerHTML='<div style="font-size:24px;margin-bottom:4px">📷</div><div class="sp-receipt-label">點擊上傳收據照片</div>';
+  document.getElementById('sp-receipt-area').classList.remove('has-img');
+  spClearAll();
+  setTimeout(renderRateBar, 50);
+}
+function closeDrawer(){
+  document.getElementById('sp-drawer-bg').classList.remove('show');
+  document.getElementById('sp-drawer').classList.remove('show');
+}
+
+function getNowStr(){
+  const now=new Date();
+  const m=now.getMonth()+1, d=now.getDate();
+  const hh=String(now.getHours()).padStart(2,'0'), mm=String(now.getMinutes()).padStart(2,'0');
+  return `${m}/${d} ${hh}:${mm}`;
+}
+
+function submitSP(){
+  const desc = document.getElementById('sp-desc').value.trim();
+  const amt  = parseFloat(document.getElementById('sp-amt').value);
+  if(!SP.selectedCat){ alert('請選擇消費類型！'); return; }
+  if(!desc){ alert('請填寫說明！'); return; }
+  if(!amt || amt<=0){ alert('請填寫金額！'); return; }
+  if(!SP.selectedPayer){ alert('請選擇付款人！'); return; }
+  if(SP.selectedWho.length===0){ alert('請選擇要分帳的人！'); return; }
+
+  const addedBy = (me && me!=='__all__') ? me : '（未選）';
+  SP.items.unshift({
+    id: Date.now(),
+    cat: SP.selectedCat,
+    desc, amt,
+    cur: SP.selectedCur,
+    payer: SP.selectedPayer,
+    who: [...SP.selectedWho],
+    time: getNowStr(),
+    addedBy,
+    receipt: receiptBase64,
+  });
+  closeDrawer();
+  renderSPList();
+  renderSPResults();
+}
+
+function deleteSP(id){
+  SP.items = SP.items.filter(i=>i.id!==id);
+  renderSPList(); renderSPResults();
+}
+
+function renderSPList(){
+  const wrap = document.getElementById('sp-items-wrap');
+  if(!wrap) return;
+  if(SP.items.length===0){
+    wrap.innerHTML=`<div style="text-align:center;padding:14px 0 6px"><div style="font-size:32px;margin-bottom:6px">🧾</div><div style="font-size:13px;font-weight:700;color:#1D1D1F;margin-bottom:2px">還沒有任何費用</div><div style="font-size:11px;color:#AEAEB2">點右下角 ＋ 新增第一筆</div></div>`;
+    return;
+  }
+  // Group by date
+  const groups = {};
+  SP.items.forEach(item=>{
+    const dk = item.time.split(' ')[0];
+    if(!groups[dk]) groups[dk]=[];
+    groups[dk].push(item);
+  });
+  wrap.innerHTML = Object.entries(groups).map(([date,items])=>`
+    <div class="sp-date-group">
+      <div class="sp-date-hd">${date}</div>
+      ${items.map(item=>{
+        const twd = toTWD(item.amt, item.cur);
+        const perHead = twd/item.who.length;
+        const ac = MEMBERS[item.payer]?.color || '#1A4B8C';
+        const whoTags = item.who.map(n=>`<span class="who-tag" style="color:${MEMBERS[n]?.color||'#888'};background:${MEMBERS[n]?.color||'#888'}18;border-color:${MEMBERS[n]?.color||'#888'}38">${n}</span>`).join('');
+        return `<div class="sp-item" onclick="showSPDetail(${item.id})">
+          <button class="sp-item-del" onclick="event.stopPropagation();deleteSP(${item.id})">✕</button>
+          <div class="sp-item-top">
+            <div class="sp-item-cat">${getCatIcon(item.cat)}</div>
+            <div class="sp-item-mid">
+              <div class="sp-item-desc">${item.desc}</div>
+              <div class="sp-item-meta">${item.time} · 付款：<span style="color:${ac};font-weight:700">${item.payer}</span></div>
+            </div>
+            ${item.receipt?`<img src="${item.receipt}" class="sp-img-thumb">`:''}
+            <div>
+              <div class="sp-item-amt" style="color:${ac}">${fmt(item.amt,item.cur)}</div>
+              <div class="sp-item-per">每人 ${fmtTWD(perHead)}</div>
+            </div>
+          </div>
+          <div class="sp-item-who">${whoTags}</div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function showSPDetail(id){
+  const item = SP.items.find(i=>i.id===id); if(!item) return;
+  const ac = MEMBERS[item.payer]?.color||'#1A4B8C';
+  const twd=toTWD(item.amt,item.cur), perHead=twd/item.who.length;
+  const whoTags=item.who.map(n=>`<span class="who-tag" style="color:${MEMBERS[n]?.color||'#888'};background:${MEMBERS[n]?.color||'#888'}18;border-color:${MEMBERS[n]?.color||'#888'}38">${n}</span>`).join('');
+  document.getElementById('sp-modal').innerHTML=`
+    <div class="sp-modal-hd">
+      <div class="sp-modal-title">${getCatIcon(item.cat)} ${item.desc}</div>
+      <button class="sp-modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div style="background:${ac}12;border-radius:14px;padding:14px;margin-bottom:16px;text-align:center">
+      <div style="font-size:28px;font-weight:900;color:${ac}">${fmt(item.amt,item.cur)}</div>
+      <div style="font-size:12px;color:#6E6E73;margin-top:4px">≈ ${fmtTWD(twd)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:#F5F5F7;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:10px;color:#AEAEB2;margin-bottom:4px">付款人</div>
+        <div style="font-size:14px;font-weight:700;color:${ac}">${item.payer}</div>
+      </div>
+      <div style="background:#F5F5F7;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:10px;color:#AEAEB2;margin-bottom:4px">每人</div>
+        <div style="font-size:14px;font-weight:700">${fmtTWD(perHead)}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:#AEAEB2;margin-bottom:8px">分帳成員（${item.who.length}人）</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${whoTags}</div>
+    </div>
+    <div style="font-size:11px;color:#AEAEB2;margin-bottom:12px">🕐 ${item.time} · 由 <b style="color:#1D1D1F">${item.addedBy}</b> 新增</div>
+    ${item.receipt?`<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#AEAEB2;margin-bottom:6px">收據</div><img src="${item.receipt}" style="width:100%;border-radius:12px;border:1px solid #E5E5EA"></div>`:''}
+    <button onclick="deleteSP(${item.id});closeModal()" style="width:100%;padding:12px;border-radius:12px;background:#FF3B3018;color:#FF3B30;border:1px solid #FF3B3030;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">刪除這筆費用</button>
+  `;
+  document.getElementById('sp-modal-bg').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('sp-modal-bg').classList.remove('show');
+}
+
+function setSPView(v, btn){
+  SP.view=v;
+  document.querySelectorAll('.sp-vtab').forEach(b=>{b.classList.remove('on');});
+  btn.classList.add('on');
+  renderSPResults();
+}
+
+function renderSPResults(){
+  const wrap = document.getElementById('sp-results-wrap'); if(!wrap) return;
+  if(SP.items.length===0){ wrap.innerHTML='<div style="text-align:center;padding:20px;color:#AEAEB2;font-size:13px">新增費用後這裡會顯示結算結果</div>'; return; }
+
+  // Calculate per-person balance
+  // balance[name] = TWD paid - TWD owed
+  const paid={}, owed={};
+  Object.keys(MEMBERS).forEach(n=>{ paid[n]=0; owed[n]=0; });
+
+  SP.items.forEach(item=>{
+    const twd=toTWD(item.amt,item.cur);
+    if(paid[item.payer]!==undefined) paid[item.payer]+=twd;
+    const perHead=twd/item.who.length;
+    item.who.forEach(n=>{ if(owed[n]!==undefined) owed[n]+=perHead; });
   });
 
-  const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1A4B8C';
-  const cur = splitCurrency;
+  const net={}; // positive = should receive, negative = should pay
+  Object.keys(MEMBERS).forEach(n=>{ net[n]=paid[n]-owed[n]; });
 
-  wrap.innerHTML = Object.entries(totals).filter(([,v])=>v.twd>0).sort((a,b)=>b[1].twd-a[1].twd).map(([name,data])=>{
-    const m = MEMBERS[name];
-    const displayAmt = convertFromTWD(data.twd, cur);
-    const itemRows = data.items.map(it=>{
-      const disp = convertFromTWD(it.twd, cur);
-      return `<div class="result-item"><span class="result-item-desc">${it.desc} <span style="color:#AEAEB2">÷${it.count}</span></span><span class="result-item-amt">${fmtCur(disp,cur)}</span></div>`;
+  if(SP.view==='summary'){
+    wrap.innerHTML = Object.entries(MEMBERS).map(([name,m])=>{
+      const owedAmt=owed[name], paidAmt=paid[name], netAmt=net[name];
+      if(owedAmt===0&&paidAmt===0) return '';
+      const myItems=SP.items.filter(i=>i.who.includes(name));
+      const rows=myItems.map(i=>{
+        const share=toTWD(i.amt,i.cur)/i.who.length;
+        return `<div class="sp-sum-row"><span class="sp-sum-desc">${getCatIcon(i.cat)} ${i.desc}</span><span class="sp-sum-val">${fmtTWD(share)}</span></div>`;
+      }).join('');
+      return `<div class="sp-sum-card">
+        <div class="sp-sum-hd" style="background:${m.color}10">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:32px;height:32px;border-radius:50%;background:${m.color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px">${name[0]}</div>
+            <div class="sp-sum-name" style="color:${m.color}">${name}</div>
+          </div>
+          <div>
+            <div class="sp-sum-amt" style="color:${m.color}">${fmtTWD(owedAmt)}</div>
+            <div style="font-size:9px;color:#AEAEB2;text-align:right">${netAmt>0?'★ 應收 '+fmtTWD(netAmt):netAmt<0?'▲ 應補 '+fmtTWD(-netAmt):'✓ 已平帳'}</div>
+          </div>
+        </div>
+        <div class="sp-sum-body">${rows}</div>
+      </div>`;
     }).join('');
-    return `<div class="result-card">
-      <div class="result-hd" style="background:${m.color}12">
-        <div class="result-hd-name" style="color:${m.color}">${name}</div>
-        <div class="result-hd-total" style="color:${m.color}">${fmtCur(displayAmt,cur)}</div>
+    // Grand
+    const grand=SP.items.reduce((s,i)=>s+toTWD(i.amt,i.cur),0);
+    wrap.innerHTML+=`<div class="sp-grand"><span class="sp-grand-lbl">全部費用總計</span><span class="sp-grand-amt">${fmtTWD(grand)}</span></div>`;
+  }
+  else if(SP.view==='detail'){
+    // Show each person's individual items with ability to tap
+    wrap.innerHTML = Object.entries(MEMBERS).map(([name,m])=>{
+      const myItems=SP.items.filter(i=>i.who.includes(name));
+      if(myItems.length===0) return '';
+      const total=myItems.reduce((s,i)=>s+toTWD(i.amt,i.cur)/i.who.length,0);
+      return `<div class="sp-sum-card">
+        <div class="sp-sum-hd" style="background:${m.color}10">
+          <div class="sp-sum-name" style="color:${m.color}">${name} 的消費</div>
+          <div class="sp-sum-amt" style="color:${m.color}">${fmtTWD(total)}</div>
+        </div>
+        <div class="sp-sum-body">
+          ${myItems.map(i=>{
+            const share=toTWD(i.amt,i.cur)/i.who.length;
+            const pc=MEMBERS[i.payer]?.color||'#888';
+            return `<div class="sp-sum-row" style="cursor:pointer" onclick="showSPDetail(${i.id})">
+              <span class="sp-sum-desc">${getCatIcon(i.cat)} ${i.desc} <span style="color:#AEAEB2;font-size:9px">（${i.time}）</span></span>
+              <span class="sp-sum-val">${fmtTWD(share)}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  else if(SP.view==='settle'){
+    // Calculate who owes whom
+    const balances={};
+    Object.keys(MEMBERS).forEach(n=>{balances[n]={...MEMBERS[n],net:net[n]};});
+    // Greedy settle
+    const creditors=[],debtors=[];
+    Object.entries(net).forEach(([n,v])=>{
+      if(v>0.5) creditors.push({name:n,amt:v});
+      else if(v<-0.5) debtors.push({name:n,amt:-v});
+    });
+    creditors.sort((a,b)=>b.amt-a.amt);
+    debtors.sort((a,b)=>b.amt-a.amt);
+    const settlements=[];
+    let ci=0,di=0;
+    const c=[...creditors],d=[...debtors];
+    while(ci<c.length&&di<d.length){
+      const pay=Math.min(c[ci].amt,d[di].amt);
+      if(pay>0.5) settlements.push({from:d[di].name,to:c[ci].name,amt:pay});
+      c[ci].amt-=pay; d[di].amt-=pay;
+      if(c[ci].amt<0.5)ci++;
+      if(d[di].amt<0.5)di++;
+    }
+    if(settlements.length===0){
+      wrap.innerHTML='<div style="text-align:center;padding:24px;background:#fff;border-radius:16px;border:1px solid #E5E5EA"><div style="font-size:32px;margin-bottom:8px">🎉</div><div style="font-size:14px;font-weight:700">大家都平帳了！</div></div>';
+    } else {
+      wrap.innerHTML=settlements.map(s=>{
+        const fm=MEMBERS[s.from]?.color||'#888';
+        const tc=MEMBERS[s.to]?.color||'#888';
+        return `<div class="sp-settle-card">
+          <div style="width:36px;height:36px;border-radius:50%;background:${fm};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:15px">${s.from[0]}</div>
+          <div class="sp-settle-info">
+            <div class="sp-settle-text"><span style="color:${fm}">${s.from}</span> 需要付給 <span style="color:${tc}">${s.to}</span></div>
+            <div class="sp-settle-sub">${s.to} 先墊付的費用</div>
+          </div>
+          <div class="sp-settle-amt" style="color:${tc}">${fmtTWD(s.amt)}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+// ── ACCOUNT SYSTEM ──
+let ACCT = {name:'', avatar:'', member:'', color:'', loaded:false};
+
+function loadAccount(){
+  try {
+    const saved = localStorage.getItem('thai_trip_acct');
+    if(saved){
+      ACCT = JSON.parse(saved);
+      ACCT.loaded = true;
+    }
+  } catch(e){}
+}
+
+function saveAccount(){
+  const name = document.getElementById('acct-name').value.trim();
+  if(!name){ alert('請輸入你的名字！'); return; }
+  if(!ACCT.member){ alert('請選擇你是哪位成員！'); return; }
+  ACCT.name = name;
+  ACCT.loaded = true;
+  try { localStorage.setItem('thai_trip_acct', JSON.stringify(ACCT)); } catch(e){}
+  document.getElementById('acct-screen').classList.add('gone');
+  setTimeout(()=>{ document.getElementById('acct-screen').style.display='none'; },350);
+  // Auto-select this member
+  me = ACCT.member;
+  const color = MEMBERS[me]?.color || '#1A4B8C';
+  document.documentElement.style.setProperty('--accent', color);
+  buildApp();
+  document.getElementById('app').classList.add('show');
+  document.getElementById('chbtn').style.display='flex';
+  document.getElementById('pick').style.display='none';
+}
+
+function acctUploadPhoto(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    ACCT.avatar=e.target.result;
+    document.getElementById('acct-av-img').src=ACCT.avatar;
+  };
+  reader.readAsDataURL(file);
+}
+
+function buildAcctMemberGrid(){
+  const wrap=document.getElementById('acct-member-grid'); if(!wrap) return;
+  Object.entries(MEMBERS).forEach(([name,m])=>{
+    const b=document.createElement('button');
+    b.className='acct-m-btn';
+    b.innerHTML=`<div class="acct-m-dot" style="background:${m.color}">${name[0]}</div><div class="acct-m-name">${name}</div>`;
+    b.onclick=()=>{
+      ACCT.member=name; ACCT.color=m.color;
+      if(!document.getElementById('acct-name').value) document.getElementById('acct-name').value=name;
+      document.querySelectorAll('.acct-m-btn').forEach(x=>{x.classList.remove('sel');x.style.borderColor='';x.style.background='';});
+      b.classList.add('sel'); b.style.borderColor=m.color; b.style.background=m.color+'15';
+    };
+    wrap.appendChild(b);
+  });
+}
+
+function showProfileBadge(){
+  const av = ACCT.avatar || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='${encodeURIComponent(ACCT.color||'%23888')}'/%3E%3Ctext x='50' y='62' text-anchor='middle' font-size='44' fill='white'%3E${encodeURIComponent(ACCT.name?ACCT.name[0]:'?')}%3C/text%3E%3C/svg%3E`;
+  const heroEl=document.getElementById('hero'); if(!heroEl) return;
+  // Remove old badge
+  const old=document.getElementById('profile-badge-el'); if(old) old.remove();
+  const badge=document.createElement('div');
+  badge.id='profile-badge-el'; badge.className='profile-badge';
+  badge.innerHTML=`<img src="${av}" class="profile-badge-av"><span class="profile-badge-name">${ACCT.name}</span>`;
+  badge.onclick=openProfileModal;
+  heroEl.appendChild(badge);
+}
+
+function openProfileModal(){
+  const av = ACCT.avatar || '';
+  document.getElementById('profile-modal').innerHTML=`
+    <div class="sp-modal-hd">
+      <div class="sp-modal-title">我的帳號</div>
+      <button class="sp-modal-close" onclick="closeProfileModal()">✕</button>
+    </div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="position:relative;width:80px;height:80px;margin:0 auto 12px;cursor:pointer" onclick="document.getElementById('profile-file').click()">
+        <img id="pm-av" src="${av||`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='${encodeURIComponent(ACCT.color||'%23888')}'/%3E%3Ctext x='50' y='62' text-anchor='middle' font-size='44' fill='white'%3E${encodeURIComponent(ACCT.name?ACCT.name[0]:'?')}%3C/text%3E%3C/svg%3E`}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #E5E5EA">
+        <div style="position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:#1D1D1F;display:flex;align-items:center;justify-content:center;font-size:12px">📷</div>
       </div>
-      <div class="result-items">${itemRows}</div>
-    </div>`;
-  }).join('');
+      <input type="file" id="profile-file" accept="image/*" style="display:none" onchange="profileUploadPhoto(this)">
+      <input id="pm-name" value="${ACCT.name}" style="width:100%;padding:12px 14px;border:1.5px solid #E5E5EA;border-radius:12px;font-size:16px;font-family:inherit;outline:none;text-align:center;margin-bottom:12px">
+      <div style="font-size:11px;color:#AEAEB2;margin-bottom:16px">目前身份：<b style="color:${ACCT.color}">${ACCT.member}</b></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px" id="pm-member-grid"></div>
+    <button onclick="saveProfileEdit()" style="width:100%;padding:14px;border-radius:14px;background:#1D1D1F;color:#fff;border:none;cursor:pointer;font-size:15px;font-weight:700;font-family:inherit;margin-bottom:10px">儲存更改</button>
+    <button onclick="clearAccount()" style="width:100%;padding:12px;border-radius:14px;background:#FF3B3015;color:#FF3B30;border:1px solid #FF3B3025;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit">清除帳號（重新設定）</button>
+  `;
+  // Build member grid in modal
+  const mg=document.getElementById('pm-member-grid');
+  Object.entries(MEMBERS).forEach(([name,m])=>{
+    const b=document.createElement('button');
+    const isSel=name===ACCT.member;
+    b.style.cssText=`border:${isSel?'2px':'1.5px'} solid ${isSel?m.color:'#E5E5EA'};border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;background:${isSel?m.color+'15':'#fff'};font-family:inherit`;
+    b.innerHTML=`<div style="width:28px;height:28px;border-radius:50%;background:${m.color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px">${name[0]}</div><div style="font-size:11px;font-weight:700;color:#1D1D1F">${name}</div>`;
+    b.dataset.name=name; b.dataset.color=m.color;
+    b.onclick=()=>{
+      document.querySelectorAll('#pm-member-grid button').forEach(x=>{x.style.borderColor='#E5E5EA';x.style.borderWidth='1.5px';x.style.background='#fff';});
+      b.style.borderColor=m.color; b.style.borderWidth='2px'; b.style.background=m.color+'15';
+      // Update name if matches old member name
+      const ni=document.getElementById('pm-name');
+      if(ni.value===ACCT.member) ni.value=name;
+    };
+    mg.appendChild(b);
+  });
+  document.getElementById('profile-modal-bg').classList.add('show');
+}
+function closeProfileModal(){document.getElementById('profile-modal-bg').classList.remove('show');}
 
-  // Grand total
-  const grandTWD = Object.values(totals).reduce((s,v)=>s+v.twd,0);
-  const grandDisp = convertFromTWD(grandTWD, cur);
-  wrap.innerHTML += `<div style="background:var(--ink);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="color:#fff;font-size:13px;font-weight:700">總計</span><span style="color:#FFD234;font-size:18px;font-weight:900">${fmtCur(grandDisp,cur)}</span></div>`;
+function profileUploadPhoto(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ document.getElementById('pm-av').src=e.target.result; ACCT._tempAvatar=e.target.result; };
+  reader.readAsDataURL(file);
 }
 
-function editRates(){
-  const newTHB = prompt('1 THB = ? TWD（目前：'+rates.THB_TWD+'）', rates.THB_TWD);
-  if(newTHB && !isNaN(newTHB)) rates.THB_TWD = parseFloat(newTHB);
-  const newUSD = prompt('1 USD = ? TWD（目前：'+rates.USD_TWD+'）', rates.USD_TWD);
-  if(newUSD && !isNaN(newUSD)) rates.USD_TWD = parseFloat(newUSD);
-  document.getElementById('r-thb').textContent = '1 THB = '+rates.THB_TWD+' TWD';
-  document.getElementById('r-usd').textContent = '1 USD = '+rates.USD_TWD+' TWD';
-  renderResults();
+function saveProfileEdit(){
+  const name=document.getElementById('pm-name').value.trim();
+  if(!name){ alert('請輸入名字！'); return; }
+  const selBtn=document.querySelector('#pm-member-grid button[style*="border-width: 2px"], #pm-member-grid button[style*="borderWidth"]');
+  // Find selected member by border style
+  let selMember=ACCT.member, selColor=ACCT.color;
+  document.querySelectorAll('#pm-member-grid button').forEach(b=>{
+    if(b.style.borderWidth==='2px'){ selMember=b.dataset.name; selColor=b.dataset.color; }
+  });
+  ACCT.name=name;
+  ACCT.member=selMember;
+  ACCT.color=selColor;
+  if(ACCT._tempAvatar){ ACCT.avatar=ACCT._tempAvatar; delete ACCT._tempAvatar; }
+  try { localStorage.setItem('thai_trip_acct',JSON.stringify(ACCT)); } catch(e){}
+  // Update app
+  me=selMember;
+  document.documentElement.style.setProperty('--accent',selColor);
+  closeProfileModal();
+  buildApp();
+  showProfileBadge();
 }
 
-buildPick();
+function clearAccount(){
+  if(!confirm('確定要清除帳號？下次打開需要重新設定。')) return;
+  try{ localStorage.removeItem('thai_trip_acct'); }catch(e){}
+  location.reload();
+}
+
+// Override selectPerson to save to account & remember
+const _origSelectPerson = selectPerson;
+function selectPerson(name){
+  if(name==='__all__'){
+    _origSelectPerson(name);
+    return;
+  }
+  // If no account saved, prompt setup after selection
+  me=name;
+  const m=MEMBERS[name];
+  ACCT.member=name; ACCT.color=m?.color||'#888';
+  if(!ACCT.name) ACCT.name=name;
+  document.getElementById('pick-screen').classList.add('gone');
+  setTimeout(()=>{
+    buildApp();
+    document.getElementById('app').classList.add('show');
+    document.getElementById('chbtn').style.display='flex';
+    const color=m?.color||'#C4522A';
+    document.documentElement.style.setProperty('--accent',color);
+    refreshNavColor();
+    showProfileBadge();
+    try{ localStorage.setItem('thai_trip_acct',JSON.stringify(ACCT)); }catch(e){}
+  },350);
+}
+
+function initApp(){
+  buildAcctMemberGrid();
+  loadAccount();
+  if(ACCT.loaded && ACCT.member && ACCT.name){
+    // Auto login
+    me = ACCT.member;
+    const color = ACCT.color || MEMBERS[me]?.color || '#C4522A';
+    document.documentElement.style.setProperty('--accent', color);
+    document.getElementById('acct-screen').style.display='none';
+    document.getElementById('pick').style.display='none';
+    buildApp();
+    document.getElementById('app').classList.add('show');
+    document.getElementById('chbtn').style.display='flex';
+    setTimeout(showProfileBadge, 300);
+    refreshNavColor();
+  } else {
+    // First time: show account setup
+    document.getElementById('pick').style.display='none';
+    buildPick(); // still build pick in background for fallback
+  }
+}
+
+initApp();
 </script>
 </body>
 </html>
+
