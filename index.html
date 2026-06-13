@@ -39,8 +39,8 @@ a{color:inherit;text-decoration:none}
 .hero{position:relative;overflow:hidden;min-height:220px;display:flex;flex-direction:column;justify-content:flex-end;padding:44px 20px 28px}
 .hero-bg{position:absolute;inset:0;transition:background .5s}
 .hdl,.hdr{position:absolute;font-size:90px;opacity:.1;user-select:none;pointer-events:none}
-.hdl{bottom:10px;left:-10px;transform:rotate(-15deg)}
-.hdr{top:10px;right:-5px;transform:rotate(12deg)}
+.hdl{bottom:10px;left:-10px;transform:rotate(-15deg);opacity:.06}
+.hdr{top:10px;right:-5px;transform:rotate(12deg);opacity:.06}
 .hwav{position:absolute;bottom:-1px;left:0;right:0;height:40px;background:var(--g4);clip-path:polygon(0 100%,100% 100%,100% 40%,0 100%);z-index:1}
 .hbody{position:relative;z-index:2}
 .htag{font-size:10px;font-weight:700;letter-spacing:2.5px;color:rgba(255,255,255,.65);margin-bottom:10px}
@@ -382,6 +382,7 @@ a{color:inherit;text-decoration:none}
 </div>
   <div class="sec" id="sec-split"></div>
 <button class="chbtn" id="chbtn" style="display:none" onclick="openProfileModal()">👤 帳號</button>
+<button id="quick-split-btn" style="display:none;position:fixed;bottom:80px;left:18px;z-index:149;background:#FFD234;color:#1D1D1F;border:none;border-radius:50px;padding:11px 18px;font-size:13px;font-weight:800;box-shadow:0 4px 20px rgba(0,0,0,.2);cursor:pointer;font-family:inherit" onclick="quickOpenSplit()">💰 記帳</button>
 
 <script>
 const CM='#C4522A',BK='#1A4B8C',KR='#1A7A52',GOLD='#C49A28';
@@ -861,10 +862,160 @@ function manualRate(){
   renderSPResults();
 }
 
-function buildSplit(){
+// ══ SUPABASE SYNC ══
+const SB_URL = 'https://pbkfkkrxesilolnxdegr.supabase.co';
+const SB_KEY = 'sb_publishable_vwkBMGxSSJBWWLIA6orAXQ_n3gow1A8';
+
+function sbHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Prefer': 'return=minimal'
+  };
+}
+
+function showSyncStatus(msg, color) {
+  const el = document.getElementById('sp-sync-status');
+  if(el) { el.textContent = msg; el.style.color = color || '#34C759'; setTimeout(()=>{ el.textContent=''; }, 2500); }
+}
+
+async function sbLoadAll() {
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/expenses?order=created_at.desc&select=*', {
+      headers: sbHeaders()
+    });
+    if(!r.ok) throw new Error(r.status);
+    const rows = await r.json();
+    // Convert from DB format to SP.items format
+    return rows.filter(r => r.action !== 'deleted').map(r => ({
+      id: r.id,
+      time: r.time,
+      addedBy: r.added_by,
+      cat: Object.values({meal:'meal',snack:'snack',coffee:'coffee',drink:'drink',trans:'trans',sight:'sight',shop:'shop',massage:'massage',other:'other'}).find(c => getCatLabel(c) === r.cat) || 'other',
+      desc: r.description,
+      amt: r.amt,
+      cur: r.cur,
+      payer: r.payer,
+      who: r.who ? r.who.split('、') : [],
+      receipt: null,
+      action: r.action
+    }));
+  } catch(e) {
+    console.log('SB load error:', e);
+    return null;
+  }
+}
+
+async function sbAdd(item) {
+  const twd = toTWD(item.amt, item.cur);
+  const perHead = item.who.length > 0 ? twd / item.who.length : twd;
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/expenses', {
+      method: 'POST',
+      headers: sbHeaders(),
+      body: JSON.stringify({
+        id: item.id,
+        time: item.time,
+        added_by: item.addedBy,
+        cat: getCatLabel(item.cat),
+        description: item.desc,
+        amt: item.amt,
+        cur: item.cur,
+        twd: Math.round(twd),
+        payer: item.payer,
+        who: item.who.join('、'),
+        per_head: Math.round(perHead),
+        action: 'add'
+      })
+    });
+    showSyncStatus('✓ 已同步', '#34C759');
+  } catch(e) { showSyncStatus('⚠ 離線模式', '#FF9500'); }
+}
+
+async function sbEdit(item) {
+  const twd = toTWD(item.amt, item.cur);
+  const perHead = item.who.length > 0 ? twd / item.who.length : twd;
+  try {
+    await fetch(SB_URL + '/rest/v1/expenses?id=eq.' + item.id, {
+      method: 'PATCH',
+      headers: sbHeaders(),
+      body: JSON.stringify({
+        cat: getCatLabel(item.cat),
+        description: item.desc,
+        amt: item.amt,
+        cur: item.cur,
+        twd: Math.round(twd),
+        payer: item.payer,
+        who: item.who.join('、'),
+        per_head: Math.round(perHead),
+        action: 'edit'
+      })
+    });
+    showSyncStatus('✓ 已更新', '#34C759');
+  } catch(e) { showSyncStatus('⚠ 離線模式', '#FF9500'); }
+}
+
+async function sbDelete(item) {
+  try {
+    await fetch(SB_URL + '/rest/v1/expenses?id=eq.' + item.id, {
+      method: 'PATCH',
+      headers: sbHeaders(),
+      body: JSON.stringify({ action: 'deleted' })
+    });
+    showSyncStatus('✓ 已刪除', '#FF3B30');
+  } catch(e) { showSyncStatus('⚠ 離線模式', '#FF9500'); }
+}
+
+// Also sync to Google Sheets (write-only backup)
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzthKD1BDAm-rrQgE6NuQ4k0svnfL9ZLIPnUn1ZolqeIuOuwdFW9RbPeH3JvXg_pbEQ/exec';
+function syncSheets(action, item) {
+  if(!item) return;
+  const twd = toTWD(item.amt, item.cur);
+  const perHead = item.who.length > 0 ? twd/item.who.length : twd;
+  fetch(SHEETS_URL, {
+    method:'POST', mode:'no-cors',
+    body: JSON.stringify({
+      action, id:String(item.id), time:item.time,
+      addedBy:item.addedBy||'', cat:getCatLabel(item.cat),
+      desc:item.desc, amt:item.amt, cur:item.cur,
+      twd:Math.round(twd), payer:item.payer,
+      who:item.who, perHead:Math.round(perHead)
+    })
+  }).catch(()=>{});
+}
+
+
+async function buildSplit(){
+  // Show loading
+  const syncEl = document.getElementById('sp-sync-status');
+  if(syncEl) { syncEl.textContent = '⟳ 載入中...'; syncEl.style.color = '#AEAEB2'; }
+  
+  // Try Supabase first
+  const sbItems = await sbLoadAll();
+  if(sbItems !== null) {
+    // Merge receipts from localStorage
+    const localMap = {};
+    try{ const s=localStorage.getItem('thai_trip_expenses'); if(s) JSON.parse(s).forEach(i=>localMap[i.id]=i); }catch(e){}
+    SP.items = sbItems.map(i => ({ ...i, receipt: localMap[i.id]?.receipt || null }));
+    // Save to localStorage as cache
+    try{ localStorage.setItem('thai_trip_expenses', JSON.stringify(SP.items)); }catch(e){}
+  } else {
+    // Fallback to localStorage
+    try{ const saved=localStorage.getItem('thai_trip_expenses'); if(saved) SP.items=JSON.parse(saved); }catch(e){}
+  }
+  if(syncEl) syncEl.textContent = '';
   const sec = document.getElementById('sec-split');
   const ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C4522A';
   sec.innerHTML = `
+    <!-- GitHub sync status -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:11px;color:#AEAEB2">費用記錄 <span id="sp-count" style="font-weight:700;color:#1D1D1F">0</span> 筆 <span id="sp-sync-status" style="color:#34C759;margin-left:4px"></span></div>
+      <a href="https://docs.google.com/spreadsheets/d/12BgkVpLkZHzrPKj-tMRU7aWPd1dd6TVpu2_ACiMVzsA/edit" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:#34A853;display:flex;align-items:center;gap:4px;text-decoration:none;background:#F5F5F7;padding:4px 10px;border-radius:10px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="#34A853"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-2h2V7h-4v2h2z"/></svg>
+        📊 查帳 Sheets
+      </a>
+    </div>
     <!-- Item list -->
     <div class="sp-items-wrap" id="sp-items-wrap">
       <div style="text-align:center;padding:16px 0 8px">
@@ -874,14 +1025,16 @@ function buildSplit(){
       </div>
     </div>
 
-    <!-- Results -->
-    <div class="sh2">📊 結算總覽</div>
-    <div class="sp-view-tabs">
-      <button class="sp-vtab on" onclick="setSPView('summary',this)">總覽</button>
-      <button class="sp-vtab" onclick="setSPView('detail',this)">個人明細</button>
-      <button class="sp-vtab" onclick="setSPView('settle',this)">誰欠誰</button>
+    <!-- Results (shown only when items exist) -->
+    <div id="sp-results-section" style="display:none">
+      <div class="sh2">📊 結算總覽</div>
+      <div class="sp-view-tabs">
+        <button class="sp-vtab on" id="sp-vtab-0" onclick="setSPView('summary',this)">總覽</button>
+        <button class="sp-vtab" id="sp-vtab-1" onclick="setSPView('detail',this)">個人明細</button>
+        <button class="sp-vtab" id="sp-vtab-2" onclick="setSPView('settle',this)">誰欠誰</button>
+      </div>
+      <div id="sp-results-wrap"></div>
     </div>
-    <div id="sp-results-wrap"></div>
 
     <!-- FAB -->
     <button class="sp-fab" style="background:${ac}" onclick="openDrawer()">＋</button>
@@ -1091,6 +1244,10 @@ function openDrawer(){
 function closeDrawer(){
   document.getElementById('sp-drawer-bg').classList.remove('show');
   document.getElementById('sp-drawer').classList.remove('show');
+  SP.editId = null;
+  // Reset title
+  const t=document.querySelector('.sp-drawer-title'); if(t) t.textContent='新增費用';
+  const b=document.getElementById('sp-submit-btn'); if(b) b.textContent='新增這筆費用';
 }
 
 function getNowStr(){
@@ -1100,234 +1257,7 @@ function getNowStr(){
   return `${m}/${d} ${hh}:${mm}`;
 }
 
-function submitSP(){
-  const desc = document.getElementById('sp-desc').value.trim();
-  const amt  = parseFloat(document.getElementById('sp-amt').value);
-  if(!SP.selectedCat){ alert('請選擇消費類型！'); return; }
-  if(!desc){ alert('請填寫說明！'); return; }
-  if(!amt || amt<=0){ alert('請填寫金額！'); return; }
-  if(!SP.selectedPayer){ alert('請選擇付款人！'); return; }
-  if(SP.selectedWho.length===0){ alert('請選擇要分帳的人！'); return; }
 
-  const addedBy = (me && me!=='__all__') ? me : '（未選）';
-  SP.items.unshift({
-    id: Date.now(),
-    cat: SP.selectedCat,
-    desc, amt,
-    cur: SP.selectedCur,
-    payer: SP.selectedPayer,
-    who: [...SP.selectedWho],
-    time: getNowStr(),
-    addedBy,
-    receipt: receiptBase64,
-  });
-  closeDrawer();
-  renderSPList();
-  renderSPResults();
-}
-
-function deleteSP(id){
-  SP.items = SP.items.filter(i=>i.id!==id);
-  renderSPList(); renderSPResults();
-}
-
-function renderSPList(){
-  const wrap = document.getElementById('sp-items-wrap');
-  if(!wrap) return;
-  if(SP.items.length===0){
-    wrap.innerHTML=`<div style="text-align:center;padding:14px 0 6px"><div style="font-size:32px;margin-bottom:6px">🧾</div><div style="font-size:13px;font-weight:700;color:#1D1D1F;margin-bottom:2px">還沒有任何費用</div><div style="font-size:11px;color:#AEAEB2">點右下角 ＋ 新增第一筆</div></div>`;
-    return;
-  }
-  // Group by date
-  const groups = {};
-  SP.items.forEach(item=>{
-    const dk = item.time.split(' ')[0];
-    if(!groups[dk]) groups[dk]=[];
-    groups[dk].push(item);
-  });
-  wrap.innerHTML = Object.entries(groups).map(([date,items])=>`
-    <div class="sp-date-group">
-      <div class="sp-date-hd">${date}</div>
-      ${items.map(item=>{
-        const twd = toTWD(item.amt, item.cur);
-        const perHead = twd/item.who.length;
-        const ac = MEMBERS[item.payer]?.color || '#1A4B8C';
-        const whoTags = item.who.map(n=>`<span class="who-tag" style="color:${MEMBERS[n]?.color||'#888'};background:${MEMBERS[n]?.color||'#888'}18;border-color:${MEMBERS[n]?.color||'#888'}38">${n}</span>`).join('');
-        return `<div class="sp-item" onclick="showSPDetail(${item.id})">
-          <button class="sp-item-del" onclick="event.stopPropagation();deleteSP(${item.id})">✕</button>
-          <div class="sp-item-top">
-            <div class="sp-item-cat">${getCatIcon(item.cat)}</div>
-            <div class="sp-item-mid">
-              <div class="sp-item-desc">${item.desc}</div>
-              <div class="sp-item-meta">${item.time} · 付款：<span style="color:${ac};font-weight:700">${item.payer}</span></div>
-            </div>
-            ${item.receipt?`<img src="${item.receipt}" class="sp-img-thumb">`:''}
-            <div>
-              <div class="sp-item-amt" style="color:${ac}">${fmt(item.amt,item.cur)}</div>
-              <div class="sp-item-per">每人 ${fmtTWD(perHead)}</div>
-            </div>
-          </div>
-          <div class="sp-item-who">${whoTags}</div>
-        </div>`;
-      }).join('')}
-    </div>`).join('');
-}
-
-function showSPDetail(id){
-  const item = SP.items.find(i=>i.id===id); if(!item) return;
-  const ac = MEMBERS[item.payer]?.color||'#1A4B8C';
-  const twd=toTWD(item.amt,item.cur), perHead=twd/item.who.length;
-  const whoTags=item.who.map(n=>`<span class="who-tag" style="color:${MEMBERS[n]?.color||'#888'};background:${MEMBERS[n]?.color||'#888'}18;border-color:${MEMBERS[n]?.color||'#888'}38">${n}</span>`).join('');
-  document.getElementById('sp-modal').innerHTML=`
-    <div class="sp-modal-hd">
-      <div class="sp-modal-title">${getCatIcon(item.cat)} ${item.desc}</div>
-      <button class="sp-modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div style="background:${ac}12;border-radius:14px;padding:14px;margin-bottom:16px;text-align:center">
-      <div style="font-size:28px;font-weight:900;color:${ac}">${fmt(item.amt,item.cur)}</div>
-      <div style="font-size:12px;color:#6E6E73;margin-top:4px">≈ ${fmtTWD(twd)}</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div style="background:#F5F5F7;border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:10px;color:#AEAEB2;margin-bottom:4px">付款人</div>
-        <div style="font-size:14px;font-weight:700;color:${ac}">${item.payer}</div>
-      </div>
-      <div style="background:#F5F5F7;border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:10px;color:#AEAEB2;margin-bottom:4px">每人</div>
-        <div style="font-size:14px;font-weight:700">${fmtTWD(perHead)}</div>
-      </div>
-    </div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:#AEAEB2;margin-bottom:8px">分帳成員（${item.who.length}人）</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${whoTags}</div>
-    </div>
-    <div style="font-size:11px;color:#AEAEB2;margin-bottom:12px">🕐 ${item.time} · 由 <b style="color:#1D1D1F">${item.addedBy}</b> 新增</div>
-    ${item.receipt?`<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#AEAEB2;margin-bottom:6px">收據</div><img src="${item.receipt}" style="width:100%;border-radius:12px;border:1px solid #E5E5EA"></div>`:''}
-    <button onclick="deleteSP(${item.id});closeModal()" style="width:100%;padding:12px;border-radius:12px;background:#FF3B3018;color:#FF3B30;border:1px solid #FF3B3030;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">刪除這筆費用</button>
-  `;
-  document.getElementById('sp-modal-bg').classList.add('show');
-}
-function closeModal(){
-  document.getElementById('sp-modal-bg').classList.remove('show');
-}
-
-function setSPView(v, btn){
-  SP.view=v;
-  document.querySelectorAll('.sp-vtab').forEach(b=>{b.classList.remove('on');});
-  btn.classList.add('on');
-  renderSPResults();
-}
-
-function renderSPResults(){
-  const wrap = document.getElementById('sp-results-wrap'); if(!wrap) return;
-  if(SP.items.length===0){ wrap.innerHTML='<div style="text-align:center;padding:20px;color:#AEAEB2;font-size:13px">新增費用後這裡會顯示結算結果</div>'; return; }
-
-  // Calculate per-person balance
-  // balance[name] = TWD paid - TWD owed
-  const paid={}, owed={};
-  Object.keys(MEMBERS).forEach(n=>{ paid[n]=0; owed[n]=0; });
-
-  SP.items.forEach(item=>{
-    const twd=toTWD(item.amt,item.cur);
-    if(paid[item.payer]!==undefined) paid[item.payer]+=twd;
-    const perHead=twd/item.who.length;
-    item.who.forEach(n=>{ if(owed[n]!==undefined) owed[n]+=perHead; });
-  });
-
-  const net={}; // positive = should receive, negative = should pay
-  Object.keys(MEMBERS).forEach(n=>{ net[n]=paid[n]-owed[n]; });
-
-  if(SP.view==='summary'){
-    wrap.innerHTML = Object.entries(MEMBERS).map(([name,m])=>{
-      const owedAmt=owed[name], paidAmt=paid[name], netAmt=net[name];
-      if(owedAmt===0&&paidAmt===0) return '';
-      const myItems=SP.items.filter(i=>i.who.includes(name));
-      const rows=myItems.map(i=>{
-        const share=toTWD(i.amt,i.cur)/i.who.length;
-        return `<div class="sp-sum-row"><span class="sp-sum-desc">${getCatIcon(i.cat)} ${i.desc}</span><span class="sp-sum-val">${fmtTWD(share)}</span></div>`;
-      }).join('');
-      return `<div class="sp-sum-card">
-        <div class="sp-sum-hd" style="background:${m.color}10">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="width:32px;height:32px;border-radius:50%;background:${m.color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px">${name[0]}</div>
-            <div class="sp-sum-name" style="color:${m.color}">${name}</div>
-          </div>
-          <div>
-            <div class="sp-sum-amt" style="color:${m.color}">${fmtTWD(owedAmt)}</div>
-            <div style="font-size:9px;color:#AEAEB2;text-align:right">${netAmt>0?'★ 應收 '+fmtTWD(netAmt):netAmt<0?'▲ 應補 '+fmtTWD(-netAmt):'✓ 已平帳'}</div>
-          </div>
-        </div>
-        <div class="sp-sum-body">${rows}</div>
-      </div>`;
-    }).join('');
-    // Grand
-    const grand=SP.items.reduce((s,i)=>s+toTWD(i.amt,i.cur),0);
-    wrap.innerHTML+=`<div class="sp-grand"><span class="sp-grand-lbl">全部費用總計</span><span class="sp-grand-amt">${fmtTWD(grand)}</span></div>`;
-  }
-  else if(SP.view==='detail'){
-    // Show each person's individual items with ability to tap
-    wrap.innerHTML = Object.entries(MEMBERS).map(([name,m])=>{
-      const myItems=SP.items.filter(i=>i.who.includes(name));
-      if(myItems.length===0) return '';
-      const total=myItems.reduce((s,i)=>s+toTWD(i.amt,i.cur)/i.who.length,0);
-      return `<div class="sp-sum-card">
-        <div class="sp-sum-hd" style="background:${m.color}10">
-          <div class="sp-sum-name" style="color:${m.color}">${name} 的消費</div>
-          <div class="sp-sum-amt" style="color:${m.color}">${fmtTWD(total)}</div>
-        </div>
-        <div class="sp-sum-body">
-          ${myItems.map(i=>{
-            const share=toTWD(i.amt,i.cur)/i.who.length;
-            const pc=MEMBERS[i.payer]?.color||'#888';
-            return `<div class="sp-sum-row" style="cursor:pointer" onclick="showSPDetail(${i.id})">
-              <span class="sp-sum-desc">${getCatIcon(i.cat)} ${i.desc} <span style="color:#AEAEB2;font-size:9px">（${i.time}）</span></span>
-              <span class="sp-sum-val">${fmtTWD(share)}</span>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`;
-    }).join('');
-  }
-  else if(SP.view==='settle'){
-    // Calculate who owes whom
-    const balances={};
-    Object.keys(MEMBERS).forEach(n=>{balances[n]={...MEMBERS[n],net:net[n]};});
-    // Greedy settle
-    const creditors=[],debtors=[];
-    Object.entries(net).forEach(([n,v])=>{
-      if(v>0.5) creditors.push({name:n,amt:v});
-      else if(v<-0.5) debtors.push({name:n,amt:-v});
-    });
-    creditors.sort((a,b)=>b.amt-a.amt);
-    debtors.sort((a,b)=>b.amt-a.amt);
-    const settlements=[];
-    let ci=0,di=0;
-    const c=[...creditors],d=[...debtors];
-    while(ci<c.length&&di<d.length){
-      const pay=Math.min(c[ci].amt,d[di].amt);
-      if(pay>0.5) settlements.push({from:d[di].name,to:c[ci].name,amt:pay});
-      c[ci].amt-=pay; d[di].amt-=pay;
-      if(c[ci].amt<0.5)ci++;
-      if(d[di].amt<0.5)di++;
-    }
-    if(settlements.length===0){
-      wrap.innerHTML='<div style="text-align:center;padding:24px;background:#fff;border-radius:16px;border:1px solid #E5E5EA"><div style="font-size:32px;margin-bottom:8px">🎉</div><div style="font-size:14px;font-weight:700">大家都平帳了！</div></div>';
-    } else {
-      wrap.innerHTML=settlements.map(s=>{
-        const fm=MEMBERS[s.from]?.color||'#888';
-        const tc=MEMBERS[s.to]?.color||'#888';
-        return `<div class="sp-settle-card">
-          <div style="width:36px;height:36px;border-radius:50%;background:${fm};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:15px">${s.from[0]}</div>
-          <div class="sp-settle-info">
-            <div class="sp-settle-text"><span style="color:${fm}">${s.from}</span> 需要付給 <span style="color:${tc}">${s.to}</span></div>
-            <div class="sp-settle-sub">${s.to} 先墊付的費用</div>
-          </div>
-          <div class="sp-settle-amt" style="color:${tc}">${fmtTWD(s.amt)}</div>
-        </div>`;
-      }).join('');
-    }
-  }
-}
 
 // ── ACCOUNT SYSTEM ──
 let ACCT = {name:'', avatar:'', member:'', color:'', loaded:false};
@@ -1492,6 +1422,7 @@ function selectPerson(name){
     buildApp();
     document.getElementById('app').classList.add('show');
     document.getElementById('chbtn').style.display='flex';
+    document.getElementById('quick-split-btn').style.display='flex';
     const color=m?.color||'#C4522A';
     document.documentElement.style.setProperty('--accent',color);
     refreshNavColor();
@@ -1526,4 +1457,3 @@ initApp();
 </script>
 </body>
 </html>
-
