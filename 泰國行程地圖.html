@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🗺 泰國行程活動區域地圖</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,"Noto Sans TC",sans-serif;background:#F2F2F7;color:#1D1D1F}
+
+.header{
+  background:linear-gradient(155deg,#04291c 0%,#0a4a34 30%,#1a7a8a 70%,#0d3d7a 100%);
+  padding:24px 20px 20px;color:#fff;
+}
+.header h1{font-size:22px;font-weight:900;margin-bottom:4px}
+.header p{font-size:12px;color:rgba(255,255,255,.6)}
+
+.tabs{
+  display:flex;background:#fff;
+  border-bottom:2px solid #E5E5EA;
+  position:sticky;top:0;z-index:1000;
+  box-shadow:0 2px 10px rgba(0,0,0,.07);
+}
+.tab-btn{
+  flex:1;padding:13px 8px;font-size:14px;font-weight:700;
+  cursor:pointer;border:none;background:none;color:#6E6E73;
+  border-bottom:3px solid transparent;font-family:inherit;
+  transition:all .2s;letter-spacing:.3px;
+}
+.tab-btn.active{color:var(--c);border-bottom-color:var(--c)}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+.city-section{padding:14px;max-width:960px;margin:0 auto}
+
+.note{
+  background:#FFFBF0;border:1px solid #C49A28;border-radius:10px;
+  padding:9px 14px;margin-bottom:12px;font-size:11.5px;color:#7A5C10;line-height:1.6
+}
+
+.map-wrap{
+  border-radius:16px;overflow:hidden;border:1px solid #E5E5EA;
+  height:460px;margin-bottom:14px;
+  box-shadow:0 2px 14px rgba(0,0,0,.07);
+}
+
+.legend{background:#fff;border-radius:16px;border:1px solid #E5E5EA;padding:16px}
+.legend-title{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#AEAEB2;margin-bottom:12px}
+.legend-items{display:flex;flex-direction:column;gap:7px}
+.legend-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 12px;border-radius:10px;background:#F5F5F7;
+  border-left:4px solid var(--c);
+}
+.l-dot{width:14px;height:14px;border-radius:50%;background:var(--c);flex-shrink:0;margin-top:3px;opacity:.85}
+.l-text{flex:1;font-size:11.5px;line-height:1.55}
+.l-title{font-weight:800;color:#1D1D1F;margin-bottom:1px}
+.l-places{color:#6E6E73;font-size:10.5px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🗺 泰國行程 · 每日活動區域地圖</h1>
+  <p>圓圈代表每天的主要活動範圍 · 點擊圓圈可查看詳情</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" style="--c:#C4522A" onclick="switchTab('cm',this)">⛩️ 清邁 D1–D5</button>
+  <button class="tab-btn" style="--c:#1A4B8C" onclick="switchTab('bk',this)">🏙 曼谷 D6–D11</button>
+  <button class="tab-btn" style="--c:#1A7A52" onclick="switchTab('kr',this)">🌴 甲米 D12–D15</button>
+</div>
+
+<!-- CHIANG MAI -->
+<div id="tab-cm" class="tab-content active">
+  <div class="city-section">
+    <div class="note">💡 D5（7/27 一）全天包車前往清萊，晚間返清邁。地圖標示為返回後的夜間活動區域。</div>
+    <div id="map-cm" class="map-wrap"></div>
+    <div class="legend"><div class="legend-title">清邁每日活動圓圈圖例</div><div class="legend-items" id="legend-cm"></div></div>
+  </div>
+</div>
+
+<!-- BANGKOK -->
+<div id="tab-bk" class="tab-content">
+  <div class="city-section">
+    <div class="note">💡 D11（8/2 日）活動分布最廣：上午恰圖恰（北）→ 朱拉隆功市集（中）→ On Nut（東南），三個圓圈跨越全曼谷。</div>
+    <div id="map-bk" class="map-wrap"></div>
+    <div class="legend"><div class="legend-title">曼谷每日活動圓圈圖例</div><div class="legend-items" id="legend-bk"></div></div>
+  </div>
+</div>
+
+<!-- KRABI -->
+<div id="tab-kr" class="tab-content">
+  <div class="city-section">
+    <div class="note">💡 萊利海灘與通塞海灘只能搭長尾船抵達，D14 四島跳船會前往外海。三個活動區都在相距 3 公里內。</div>
+    <div id="map-kr" class="map-wrap"></div>
+    <div class="legend"><div class="legend-title">甲米每日活動圓圈圖例</div><div class="legend-items" id="legend-kr"></div></div>
+  </div>
+</div>
+
+<script>
+// ── Day Data ──────────────────────────────────────────────
+const DAYS = {
+  cm: [
+    {
+      day:'D1', date:'7/23 四', color:'#FF6B35',
+      label:'D1 · 7/23 四 · 抵達清邁',
+      circles:[{lat:18.7971,lng:98.9683,r:650}],
+      places:'尼曼一號商圈 / BED Nimman 飯店 / Khao Soy Nimman 晚餐'
+    },
+    {
+      day:'D2', date:'7/24 五', color:'#C4522A',
+      label:'D2 · 7/24 五 · 古城寺廟巡禮 + 米其林 + 爵士酒吧',
+      circles:[{lat:18.7890,lng:98.9880,r:950}],
+      places:'帕邢寺 / 契迪龍寺 / 盼道寺 / 麗菈監獄按摩 / Baan Landai / 北門爵士酒吧'
+    },
+    {
+      day:'D3', date:'7/25 六', color:'#9B59B6',
+      label:'D3 · 7/25 六 · 市集之旅 — 從早買到晚',
+      circles:[
+        {lat:18.8058,lng:98.9668,r:450}, // Jing Jai
+        {lat:18.7910,lng:98.9970,r:400}, // Warorot
+        {lat:18.8020,lng:98.9630,r:380}  // CMU Night Market
+      ],
+      places:'真心市集 Jing Jai / 瓦洛洛傳統市場 / 清邁大學夜市'
+    },
+    {
+      day:'D4', date:'7/26 日', color:'#3498DB',
+      label:'D4 · 7/26 日 · 換飯店 + 藝術村 + 週末夜市',
+      circles:[
+        {lat:18.7970,lng:98.9680,r:500}, // G Nimman
+        {lat:18.7820,lng:98.9510,r:400}, // Baan Kang Wat
+        {lat:18.7840,lng:98.9930,r:600}  // Tha Phae + Wualai weekend mkt
+      ],
+      places:'G Nimman 換飯店 / Baan Kang Wat 森林藝術村 / 塔佩門 / 瓦來路週末夜市'
+    },
+    {
+      day:'D5', date:'7/27 一', color:'#27AE60',
+      label:'D5 · 7/27 一 · 清萊一日遊（傍晚返清邁）',
+      circles:[{lat:18.7840,lng:98.9870,r:600}],
+      places:'（全天包車清萊）傍晚返清邁 → 尼曼路逛街 / 清邁門夜市'
+    },
+  ],
+
+  bk: [
+    {
+      day:'D6', date:'7/28 二', color:'#FF6B35',
+      label:'D6 · 7/28 二 · 清邁飛曼谷，入住 Amara',
+      circles:[{lat:13.7295,lng:100.5310,r:850}],
+      places:'入住 Amara Bangkok (Sala Daeng) / MBK 逛街'
+    },
+    {
+      day:'D7', date:'7/29 三', color:'#E84393',
+      label:'D7 · 7/29 三 · 嵩越路 + 唐人街 + 都喜百貨',
+      circles:[
+        {lat:13.7340,lng:100.5130,r:900}, // Charoen Krung + Yaowarat
+        {lat:13.7260,lng:100.5390,r:600}  // Dusit Central Park / Silom
+      ],
+      places:'嵩越路文青街 / 唐人街 Yaowarat / BIG-C 採買 / 都喜中央公園'
+    },
+    {
+      day:'D8', date:'7/30 四', color:'#27AE60',
+      label:'D8 · 7/30 四 · 書書・小武・阿淳抵達！EmSphere',
+      circles:[{lat:13.7185,lng:100.5860,r:700}],
+      places:'機場接機 → EmSphere 百貨 (Sukhumvit 57) / 榮泰米粉湯'
+    },
+    {
+      day:'D9', date:'7/31 五', color:'#9B59B6',
+      label:'D9 · 7/31 五 · Copper 自助餐 + Thonglor 酒吧夜',
+      circles:[{lat:13.7260,lng:100.5750,r:950}],
+      places:'Copper Buffet / V 博物館 / Thonglor Ekkamai 酒吧六人夜'
+    },
+    {
+      day:'D10', date:'8/1 六', color:'#3498DB',
+      label:'D10 · 8/1 六 · 依凡棋哥回台！河岸 + DJ Station',
+      circles:[
+        {lat:13.7630,lng:100.4890,r:620}, // 王朗市場
+        {lat:13.7280,lng:100.5095,r:900}, // ICONSIAM + Hilton + 嵩越路
+        {lat:13.7260,lng:100.5330,r:450}  // DJ Station Silom
+      ],
+      places:'千禧希爾頓 / 王朗市場 / 嵩越路 / ICONSIAM / 飯店休息 / DJ Station'
+    },
+    {
+      day:'D11', date:'8/2 日', color:'#E74C3C',
+      label:'D11 · 8/2 日 · 恰圖恰 + 朱拉隆功市集 + On Nut',
+      circles:[
+        {lat:13.7998,lng:100.5527,r:750}, // 恰圖恰 + Or Tor Kor
+        {lat:13.7360,lng:100.5250,r:600}, // 朱拉隆功 / 市中心
+        {lat:13.7012,lng:100.6015,r:550}  // On Nut
+      ],
+      places:'恰圖恰週末市集 / Or Tor Kor 農夫市集 / 朱拉隆功大學周邊市集 / On Nut 糖絲捲餅'
+    },
+  ],
+
+  kr: [
+    {
+      day:'D12', date:'8/3 一', color:'#FF8C00',
+      label:'D12 · 8/3 一 · 抵達甲米！入住 Ao Nang',
+      circles:[{lat:8.0285,lng:98.8310,r:750}],
+      places:'喀比機場抵達 → 入住 COSI Krabi Ao Nang Beach'
+    },
+    {
+      day:'D13', date:'8/4 二', color:'#27AE60',
+      label:'D13 · 8/4 二 · 換住喀比帕南 · 阿南海灘',
+      circles:[{lat:8.0280,lng:98.8300,r:850}],
+      places:'換住喀比帕南度假村 / 阿南海灘 Ao Nang Beach / 海灘酒吧看夕陽'
+    },
+    {
+      day:'D14', date:'8/5 三', color:'#9B59B6',
+      label:'D14 · 8/5 三 · 萊利海灘 + 四島跳船',
+      circles:[{lat:8.0115,lng:98.8360,r:650}],
+      places:'萊利海灘 Railay Beach（長尾船 15 分鐘）/ 四島遊船 / 攀岩'
+    },
+    {
+      day:'D15', date:'8/6 四', color:'#3498DB',
+      label:'D15 · 8/6 四 · 通塞秘境海灘 Tonsai',
+      circles:[{lat:8.0165,lng:98.8415,r:480}],
+      places:'Tinidee Hideaway Tonsai Beach（船才能到）/ 浮潛 / 獨木舟 / 紅樹林'
+    },
+  ]
+};
+
+// ── Map Init ──────────────────────────────────────────────
+const MAPS = {};
+const INITED = {cm:false, bk:false, kr:false};
+
+const CFG = {
+  cm:{center:[18.791,98.979],zoom:14},
+  bk:{center:[18.750,100.545],zoom:12}, // note: will be overridden below
+  kr:{center:[8.022,98.836],zoom:14}
+};
+// Bangkok center needs to cover Chatuchak (13.800) to On Nut (13.701)
+CFG.bk.center = [13.755, 100.545];
+CFG.bk.zoom = 12;
+
+function dayLabel(d){
+  return `<b style="color:${d.color}">${d.label}</b><br><span style="font-size:11px;color:#666;line-height:1.6">${d.places}</span>`;
+}
+
+function initMap(region){
+  const cfg = CFG[region];
+  const map = L.map('map-'+region, {center:cfg.center, zoom:cfg.zoom, zoomControl:true});
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom:19
+  }).addTo(map);
+
+  const days = DAYS[region];
+  const legendEl = document.getElementById('legend-'+region);
+
+  days.forEach(d=>{
+    d.circles.forEach((c,ci)=>{
+      // Draw filled circle
+      const circle = L.circle([c.lat,c.lng],{
+        radius:c.r,
+        color:d.color,
+        fillColor:d.color,
+        fillOpacity:0.18,
+        weight:2.5,
+        opacity:0.85
+      }).addTo(map);
+
+      circle.bindPopup(dayLabel(d), {maxWidth:260});
+
+      // Day label badge (only on first circle of the day)
+      if(ci===0){
+        L.marker([c.lat,c.lng],{
+          icon:L.divIcon({
+            className:'',
+            html:`<div style="background:${d.color};color:#fff;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);line-height:1.4">${d.day}<span style="font-size:9px;opacity:.8;margin-left:3px">${d.date}</span></div>`,
+            iconAnchor:[30,26]
+          }),
+          interactive:false
+        }).addTo(map);
+      }
+
+      // Center dot
+      L.circleMarker([c.lat,c.lng],{
+        radius:4, color:d.color, fillColor:d.color, fillOpacity:1, weight:2
+      }).addTo(map);
+    });
+
+    // Legend item
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.style.setProperty('--c', d.color);
+    item.innerHTML = `
+      <div class="l-dot"></div>
+      <div class="l-text">
+        <div class="l-title">${d.label}</div>
+        <div class="l-places">${d.places}</div>
+      </div>`;
+    legendEl.appendChild(item);
+  });
+
+  MAPS[region] = map;
+  INITED[region] = true;
+}
+
+function switchTab(region, btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+region).classList.add('active');
+  btn.classList.add('active');
+  if(!INITED[region]){
+    setTimeout(()=>initMap(region), 60);
+  } else {
+    setTimeout(()=>MAPS[region].invalidateSize(), 60);
+  }
+}
+
+// Init CM on load
+window.addEventListener('load', ()=>initMap('cm'));
+</script>
+</body>
+</html>
