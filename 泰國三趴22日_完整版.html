@@ -325,14 +325,26 @@ body{font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
 .ov-stat-num{font-size:28px;font-weight:800;color:#1877f2;line-height:1}
 .ov-stat-lbl{font-size:11px;color:#606770;margin-top:4px;font-weight:600}
 /* Timeline */
-.tl-wrap{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.1),0 4px 16px rgba(0,0,0,.06);overflow:hidden}
+.tl-wrap{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.1),0 4px 16px rgba(0,0,0,.06);overflow:hidden;width:100%}
 .tl-title{font-size:13.5px;font-weight:700;color:#1a2a4a;margin-bottom:12px}
 .tl-scroll{overflow-x:auto}
 .tl-table{border-collapse:collapse;font-size:11px;white-space:nowrap}
 .tl-table th{padding:4px 3px;color:#888;font-weight:600;text-align:center;border-bottom:1px solid #e8eaed;min-width:24px}
+
+/* City tabs in map panel */
+.city-tab-btn{flex:1;padding:10px 6px;border:none;background:#f8f9fa;cursor:pointer;font-size:13px;font-weight:600;color:#888;transition:all .2s;font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px}
+.city-tab-btn.active{background:#fff;color:#1a2a4a;border-bottom-color:var(--ct-color,#1a2a4a)}
+.city-tab-btn:hover:not(.active){background:#f0f2f5}
+/* Hotel bookmark row */
+.hotel-bookmark{display:flex;align-items:center;gap:8px;padding:8px 12px;background:linear-gradient(90deg,rgba(0,0,0,.04),transparent);border-left:4px solid var(--sec-color,#888);margin-bottom:2px;border-radius:0 8px 8px 0}
+.hotel-bookmark .hb-icon{font-size:16px}
+.hotel-bookmark .hb-text{flex:1;min-width:0}
+.hotel-bookmark .hb-name{font-size:12px;font-weight:700;color:#333}
+.hotel-bookmark .hb-label{font-size:10px;color:#999;margin-top:1px}
+
 .tl-table th.city-hd{color:#fff;font-size:10px;font-weight:800;padding:3px 5px}
-.tl-name-col{padding:5px 12px 5px 0;font-weight:700;font-size:12px;white-space:nowrap;border-right:1px solid #e8eaed;min-width:56px;vertical-align:middle}
-.tl-dot{display:inline-block;width:22px;height:22px;border-radius:5px;vertical-align:middle}
+.tl-name-col{padding:5px 10px 5px 4px;font-weight:700;font-size:13px;white-space:nowrap;border-right:1px solid #e8eaed;min-width:52px;vertical-align:middle}
+.tl-dot{display:inline-block;width:24px;height:24px;border-radius:6px;vertical-align:middle}
 /* City cards */
 .city-cards{display:flex;gap:12px;flex-wrap:wrap}
 .city-card{flex:1;min-width:180px;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1);cursor:pointer;transition:.15s}
@@ -421,17 +433,17 @@ body{font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
       <div class="ov-stat"><div class="ov-stat-num" id="ov-stat-members">7</div><div class="ov-stat-lbl">位旅伴</div></div>
     </div>
     <div class="city-cards">
-      <div class="city-card" onclick="switchTab('map')">
-        <div class="city-card-hd" style="background:#C4522A">⛩️ 清邁 D1–D5</div>
-        <div class="city-card-body">7/23（四）～ 7/27（一）<br>5天・古城・尼曼商圈・大象・夜市</div>
+      <div class="city-card" onclick="switchTab('map');switchMapCity(0)" style="cursor:pointer">
+        <div class="city-card-hd" style="background:#C4522A">⛩️ 清邁　7/23 – 7/27</div>
+        <div class="city-card-body">5 天 · 古城 · 尼曼商圈 · 大象 · 夜市</div>
       </div>
-      <div class="city-card" onclick="switchTab('map')">
-        <div class="city-card-hd" style="background:#1A4B8C">🏙 曼谷 D6–D11</div>
-        <div class="city-card-body">7/28（二）～ 8/2（日）<br>6天・BTS・王朗・河濱・DJ Station</div>
+      <div class="city-card" onclick="switchTab('map');switchMapCity(1)" style="cursor:pointer">
+        <div class="city-card-hd" style="background:#1A4B8C">🏙 曼谷　7/28 – 8/2</div>
+        <div class="city-card-body">6 天 · BTS · 王朗 · 河濱 · DJ Station</div>
       </div>
-      <div class="city-card" onclick="switchTab('map')">
-        <div class="city-card-hd" style="background:#1A7A52">🌴 甲米 D12–D22</div>
-        <div class="city-card-body">8/3（一）～ 8/13（四）<br>11天・奧南海灘・萊利灣・四島・皮皮島</div>
+      <div class="city-card" onclick="switchTab('map');switchMapCity(2)" style="cursor:pointer">
+        <div class="city-card-hd" style="background:#1A7A52">🌴 甲米　8/3 – 8/13</div>
+        <div class="city-card-body">11 天 · 奧南海灘 · 萊利灣 · 四島 · 皮皮島</div>
       </div>
     </div>
     <div class="tl-wrap">
@@ -449,6 +461,7 @@ body{font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
 
 <!-- ══ TAB 2: 地圖 ══ -->
 <div id="tab-map" class="tab-panel">
+  <div id="city-tab-bar" style="display:flex;gap:0;border-bottom:2px solid #e8eaed;background:#fff;position:sticky;top:48px;z-index:90"></div>
   <div id="sections-wrap"></div>
   <button class="add-sec" onclick="addSection()">➕ 新增區域地圖</button>
 </div>
@@ -1354,6 +1367,7 @@ const HOTELS=[
 // ── State ──────────────────────────────────────────────
 let trip = loadData();
 let maps = {}, editMode = {}, activeDays = {};
+let activeMapSec = 0; // index into trip.sections
 let srTimer = null;
 
 function loadData(){
@@ -1414,9 +1428,42 @@ function renderAll(){
   document.getElementById('tc-dates').textContent=trip.dates;
   Object.values(maps).forEach(m=>m?.remove());
   maps={};
+  renderMapCityTabs();
+}
+
+function renderMapCityTabs(){
+  const bar=document.getElementById('city-tab-bar');
+  if(!bar) return;
+  bar.innerHTML='';
+  const SEC_COLORS=['#C4522A','#1A4B8C','#1A7A52'];
+  trip.sections.forEach((sec,idx)=>{
+    const btn=document.createElement('button');
+    btn.className='city-tab-btn'+(idx===activeMapSec?' active':'');
+    btn.style.setProperty('--ct-color',SEC_COLORS[idx]||sec.color||'#1a2a4a');
+    btn.textContent=sec.name.replace(/\|.*$/,'').trim();
+    btn.onclick=()=>switchMapCity(idx);
+    bar.appendChild(btn);
+  });
+  renderActiveSection();
+}
+
+function switchMapCity(idx){
+  activeMapSec=idx;
+  renderMapCityTabs();
+  // Re-init map for this section after it becomes visible
+  setTimeout(()=>{
+    const sec=trip.sections[activeMapSec];
+    if(sec){ initMap(sec); setTimeout(()=>{ try{maps[sec.id]?.invalidateSize();}catch(e){} },80); }
+  },20);
+}
+
+function renderActiveSection(){
   const wrap=document.getElementById('sections-wrap');
-  wrap.innerHTML='';
-  trip.sections.forEach(s=>renderSection(s,wrap));
+  if(!wrap) return;
+  // Remove old sec-wrap children
+  Array.from(wrap.querySelectorAll('.sec-wrap')).forEach(el=>el.remove());
+  const sec=trip.sections[activeMapSec];
+  if(sec) renderSection(sec,wrap);
 }
 
 // ── Section ────────────────────────────────────────────
@@ -1514,6 +1561,39 @@ function renderDayTabs(sec){
   bar.appendChild(addDay);
 }
 
+
+// ── Hotel bookmark helper ─────────────────────────────
+const SEC_HOTEL_IDX={'s-cm':0,'s-bk':1,'s-kr':2};
+function getHotelForDay(sec, dayNum){
+  const hi=SEC_HOTEL_IDX[sec.id];
+  if(hi===undefined) return null;
+  const city=HOTELS[hi];
+  if(!city||!city.stays) return null;
+  // Compute actual date for this day
+  const offset=(sec.startDayOffset||0)+dayNum-1;
+  const dt=new Date(2026,6,23+offset);
+  const m=dt.getMonth()+1, d=dt.getDate();
+  // Find stay whose date range covers this date
+  // Date range format: 'M/D–M/D'
+  for(const stay of city.stays){
+    const parts=(stay.dates||'').split('–');
+    if(parts.length<2) continue;
+    function parseDate(s){var p=s.trim().split('/');return new Date(2026,parseInt(p[0])-1,parseInt(p[1]));}
+    const from=parseDate(parts[0]), to=parseDate(parts[1]);
+    if(dt>=from && dt<to) return stay;
+  }
+  return null;
+}
+function renderHotelBookmark(sec, dayNum, label){
+  const h=getHotelForDay(sec,dayNum);
+  const name=h?h.name:'飯店';
+  const div=document.createElement('div');
+  div.className='hotel-bookmark';
+  div.style.setProperty('--sec-color',sec.color||'#888');
+  div.innerHTML=`<div class="hb-icon">🏨</div><div class="hb-text"><div class="hb-name">${esc(name)}</div><div class="hb-label">${label}</div></div>`;
+  return div;
+}
+
 // ── Attraction List ─────────────────────────────────────
 function renderList(sec){
   const list=document.getElementById('al-'+sec.id);
@@ -1588,6 +1668,12 @@ function renderList(sec){
       list.appendChild(row);
     }
   });
+
+  // Hotel bookmark at bottom when viewing specific day
+  if(ad>0){
+    list.insertBefore(renderHotelBookmark(sec,ad,'⬆ 出發點・行程起點'),list.firstChild);
+    list.appendChild(renderHotelBookmark(sec,ad,'⬇ 返回住宿・行程終點'));
+  }
 
   const addBtn=document.createElement('button');
   addBtn.className='add-attr-btn';
@@ -2243,8 +2329,10 @@ function switchTab(name) {
     if(btn)   btn.classList.toggle('active', id===name);
   });
   if (name === 'map') {
+    renderMapCityTabs();
     setTimeout(function() {
-      if(trip && trip.sections) trip.sections.forEach(function(sec){ initMap(sec); });
+      var sec = trip && trip.sections && trip.sections[activeMapSec];
+      if(sec) initMap(sec);
       setTimeout(function() {
         Object.values(maps).forEach(function(m){ try{ m.invalidateSize(); }catch(e){} });
       }, 80);
@@ -2270,13 +2358,21 @@ function renderTimeline() {
     var dt = new Date(startDate.getTime()); dt.setDate(dt.getDate()+d-1);
     return (dt.getMonth()+1)+'/'+(dt.getDate());
   }
-  var h = '<table class="tl-table"><thead>';
-  h += '<tr><th style="border-right:1px solid #e8eaed"></th>';
+  var h = '<table class="tl-table" style="width:100%"><thead>';
+  // Row 1: City spans
+  h += '<tr><th style="border-right:1px solid #e8eaed;min-width:52px"></th>';
   CITY_RANGES.forEach(function(c) {
-    h += '<th colspan="'+c.cnt+'" class="city-hd" style="background:'+c.color+'">'+c.name+'</th>';
+    h += '<th colspan="'+c.cnt+'" class="city-hd" style="background:'+c.color+';border-radius:4px 4px 0 0">'+c.name+'</th>';
   });
-  h += '</tr><tr><th style="border-right:1px solid #e8eaed;text-align:left;padding-left:2px;font-size:11px;white-space:nowrap">成員</th>';
-  for(var d=1;d<=22;d++) h += '<th title="D'+d+' ('+dayLabel(d)+')">D'+d+'</th>';
+  // Row 2: dates header
+  h += '</tr><tr><th style="border-right:1px solid #e8eaed;text-align:left;padding:4px 8px 4px 4px;font-size:11px;font-weight:700;color:#444">成員</th>';
+  for(var d=1;d<=22;d++){
+    var dl=dayLabel(d);
+    var parts=dl.split('/');
+    h += '<th title="D'+d+'" style="padding:2px 1px;font-size:10px;line-height:1.2;text-align:center">'+
+         '<div style="color:#aaa;font-size:9px">'+parts[0]+'/</div>'+
+         '<div style="font-weight:800;color:#444">'+parts[1]+'</div></th>';
+  }
   h += '</tr></thead><tbody>';
   MEMBERS.forEach(function(m) {
     var fd = dateToDay(m.from), td = dateToDay(m.to);
