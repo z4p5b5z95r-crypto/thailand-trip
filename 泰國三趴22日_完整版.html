@@ -1833,8 +1833,8 @@ function renderList(sec){
           onblur="attrF('${sec.id}','${a.id}','name',this.textContent)">${esc(a.name)}</span>
         <span class="attr-sub" contenteditable="true" spellcheck="false"
           onblur="attrF('${sec.id}','${a.id}','sub',this.textContent)">${esc(a.sub||'')}</span>
-        <span class="attr-time ${a.startTime?'':'unset'}"
-          onclick="editAttrTime('${sec.id}','${a.id}',event)">${a.startTime?fmtTimeRange(a.startTime,a.stayMins||60):'⏰ 設定時間'}</span>
+        <span class="attr-time ${(_dtimes[a.id]||a.startTime)?'':'unset'}"
+          onclick="editAttrTime('${sec.id}','${a.id}',${idx===0&&ad>0},event)">${_dtimes[a.id]||(a.startTime?fmtTimeRange(a.startTime,a.stayMins||60):'⏰ 設定時間')}</span>
         ${(!a.lat||!a.lng)?`<span class="no-coord" onclick="pinMode('${sec.id}','${a.id}')">📍 點地圖定位</span>`:`<span class="has-coord" onclick="openAttrEdit('${sec.id}','${a.id}')">📍 ${a.lat.toFixed(4)},${a.lng.toFixed(4)}</span>`}
       </div>
       ${ad===0?`<span class="attr-day-badge" style="background:${dc}"
@@ -2510,7 +2510,7 @@ function crudSave(){
     var o={name:gv('cf-name'),color:_cc,from:gv('cf-from'),to:gv('cf-to'),note:gv('cf-note')};
     if(!o.name){document.getElementById('cf-name').focus();return;}
     if(_ci>=0)Object.assign(MEMBERS[_ci],o);else MEMBERS.push(o);
-    crudClose();renderMembers();
+    crudClose();renderMembers();renderTimeline();
   } else if(_ct==='flight'){
     var o={label:gv('cf-label'),from:gv('cf-from'),to:gv('cf-to'),date:gv('cf-date'),dep:gv('cf-dep'),arr:gv('cf-arr'),flight:gv('cf-flight'),cost:gv('cf-cost'),c:_cc};
     if(!o.label){document.getElementById('cf-label').focus();return;}
@@ -2525,13 +2525,13 @@ function crudSave(){
 }
 function crudDel(){
   if(!confirm('確定刪除？'))return;
-  if(_ct==='member'){MEMBERS.splice(_ci,1);crudClose();renderMembers();}
+  if(_ct==='member'){MEMBERS.splice(_ci,1);crudClose();renderMembers();renderTimeline();}
   else if(_ct==='flight'){FLIGHTS.splice(_ci,1);crudClose();renderFlights();}
   else if(_ct==='hotel'){HOTELS[_cCi].stays.splice(_ci,1);crudClose();renderHotels();}
 }
 function ovDel(type,idx,ci){
   if(!confirm('確定刪除？'))return;
-  if(type==='member'){MEMBERS.splice(idx,1);renderMembers();}
+  if(type==='member'){MEMBERS.splice(idx,1);renderMembers();renderTimeline();}
   else if(type==='flight'){FLIGHTS.splice(idx,1);renderFlights();}
   else if(type==='hotel'){HOTELS[ci].stays.splice(idx,1);renderHotels();}
 }
@@ -2625,41 +2625,57 @@ function fmtTimeRange(start,mins){
   var h=mins>=60?Math.floor(mins/60)+'小時'+(mins%60?mins%60+'分':''):(mins||60)+'分';
   return '⏰ '+start+'–'+end+' ('+h+')';
 }
-function editAttrTime(sid,aid,ev){
-  ev.stopPropagation();
-  var sec=trip.sections.find(function(s){return s.id===sid;});
-  var a=sec&&sec.attractions.find(function(x){return x.id===aid;});
+function editAttrTime(sid,aid,isFirst,ev){
+  if(ev) ev.stopPropagation();
+  var _sid=sid, _aid=aid;
+  var sec=trip.sections.find(function(s){return s.id===_sid;});
+  var a=sec&&sec.attractions.find(function(x){return x.id===_aid;});
   if(!a) return;
   var title=document.getElementById('crud-title');
   var body=document.getElementById('crud-body');
   var btns=document.getElementById('crud-btns');
-  title.textContent='⏰ 設定停留時間';
-  body.innerHTML=
-    '<div class="cf"><label>開始時間</label><input id="et-start" type="time" value="'+(a.startTime||'09:00')+'"></div>'+
-    '<div class="cf"><label>停留時間（分鐘）</label><input id="et-stay" type="number" min="5" step="5" value="'+(a.stayMins||60)+'"></div>'+
-    '<div id="et-preview" style="text-align:center;font-size:18px;font-weight:800;color:#1877f2;padding:8px 0"></div>';
-  function updatePreview(){
-    var s=document.getElementById('et-start')?.value||'09:00';
-    var m=+(document.getElementById('et-stay')?.value||60);
-    document.getElementById('et-preview').textContent=fmtTimeRange(s,m);
+
+  if(isFirst){
+    title.textContent='⏰ 設定今日出發時間';
+    body.innerHTML=
+      '<div style="font-size:11.5px;color:#888;margin-bottom:10px;line-height:1.5">設定第一站出發時間後，後續各點時間自動依停留＋交通時間推算。</div>'+
+      '<div class="cf"><label>📍 今日出發時間</label><input id="et-start" type="time" value="'+(a.startTime||'09:00')+'"></div>'+
+      '<div class="cf"><label>停留時間（分鐘）</label><input id="et-stay" type="number" min="5" step="5" value="'+(a.stayMins||60)+'"></div>'+
+      '<div id="et-preview" style="text-align:center;font-size:18px;font-weight:800;color:#1877f2;padding:8px 0"></div>';
+  } else {
+    title.textContent='⏰ 調整停留時間';
+    body.innerHTML=
+      '<div style="font-size:11.5px;color:#888;margin-bottom:10px;line-height:1.5">此站開始時間由上一站自動計算，調整停留時間即可更新後續時程。</div>'+
+      '<div class="cf"><label>停留時間（分鐘）</label><input id="et-stay" type="number" min="5" step="5" value="'+(a.stayMins||60)+'"></div>'+
+      '<div id="et-preview" style="text-align:center;font-size:16px;font-weight:800;color:#1877f2;padding:8px 0"></div>';
   }
+
+  function updatePreview(){
+    var s=isFirst?(document.getElementById('et-start')?.value||'09:00'):null;
+    var m=+(document.getElementById('et-stay')?.value||60);
+    var h=m>=60?Math.floor(m/60)+'小時'+(m%60?m%60+'分':''):m+'分';
+    document.getElementById('et-preview').textContent=s?fmtTimeRange(s,m):'停留 '+h;
+  }
+
   btns.innerHTML=
     '<button class="crud-cancel" onclick="crudClose()">取消</button>'+
-    '<button class="crud-ok" onclick="saveAttrTime(\''+sid+'\',\''+aid+'\')">儲存</button>';
+    '<button class="crud-ok" onclick="_saveAttrTime()">儲存</button>';
+
+  window._saveAttrTime=function(){
+    var sec2=trip.sections.find(function(s){return s.id===_sid;});
+    var a2=sec2&&sec2.attractions.find(function(x){return x.id===_aid;});
+    if(!a2) return;
+    if(isFirst) a2.startTime=document.getElementById('et-start')?.value||null;
+    a2.stayMins=+(document.getElementById('et-stay')?.value||60);
+    save(); crudClose(); renderList(sec2);
+  };
+
   document.getElementById('crud-ov').style.display='flex';
   setTimeout(function(){
     document.getElementById('et-start')?.addEventListener('input',updatePreview);
     document.getElementById('et-stay')?.addEventListener('input',updatePreview);
     updatePreview();
   },50);
-}
-function saveAttrTime(sid,aid){
-  var sec=trip.sections.find(function(s){return s.id===sid;});
-  var a=sec&&sec.attractions.find(function(x){return x.id===aid;});
-  if(!a) return;
-  a.startTime=document.getElementById('et-start')?.value||null;
-  a.stayMins=+(document.getElementById('et-stay')?.value||60);
-  save(); crudClose(); renderList(sec);
 }
 
 
