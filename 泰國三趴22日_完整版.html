@@ -235,6 +235,186 @@ body{font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
 .day-assign-picker button:hover{background:#eef4ff;border-color:var(--blue);color:var(--blue)}
 
 /* ── Print ── */
+
+/* ══════════════════════════════════════════
+   MOBILE RESPONSIVE  ≤ 768px
+══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* ── Body padding for bottom nav ── */
+  body { padding-bottom: 68px !important; }
+
+  /* ── Header ── */
+  .trip-cover { padding: 16px 16px 14px; }
+  .trip-emoji { font-size: 24px; margin-bottom: 4px; }
+  .tc-title { font-size: 17px; }
+  .tc-sub   { font-size: 12px; }
+  .tc-dates { font-size: 11px; }
+  .tc-actions { gap: 6px; margin-top: 10px; }
+  .hbtn { font-size: 11px; padding: 5px 10px; }
+
+  /* ── Tab bar → fixed bottom nav ── */
+  .tab-bar {
+    position: fixed !important;
+    bottom: 0; left: 0; right: 0; top: auto !important;
+    display: flex;
+    padding: 0;
+    background: #fff;
+    border-top: 1px solid #e0e4ea;
+    border-bottom: none;
+    box-shadow: 0 -2px 12px rgba(0,0,0,.1);
+    z-index: 999;
+    height: 58px;
+  }
+  .tab-btn {
+    flex: 1;
+    font-size: 9.5px;
+    padding: 6px 2px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border-radius: 0;
+    border-bottom: none;
+    border-top: 3px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tab-btn.active { border-top-color: var(--blue); border-bottom: none; }
+
+  /* ── Panel padding ── */
+  .ov-section-single { padding: 12px 12px; gap: 12px; }
+  .ov-section        { padding: 12px 12px 0; gap: 12px; }
+
+  /* ── Stats ── */
+  .ov-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ov-stat  { padding: 12px 10px; }
+  .ov-stat-num { font-size: 22px; }
+
+  /* ── City cards ── */
+  .city-cards { flex-direction: column; gap: 8px; }
+  .city-card  { min-width: unset; }
+  .city-card-hd   { font-size: 13px; padding: 10px 14px; }
+  .city-card-body { font-size: 11.5px; padding: 8px 14px; }
+
+  /* ── Quick nav ── */
+  .quick-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .quick-nav-btn { min-width: unset; font-size: 11px; padding: 9px 6px; }
+
+  /* ── Member grid ── */
+  .member-grid { grid-template-columns: 1fr; gap: 8px; padding: 10px; }
+  .mc-card { padding: 11px 13px 9px; }
+  .mc-name { font-size: 14px; }
+  /* Always show edit controls on touch */
+  .ov-ctrl { opacity: 1 !important; }
+
+  /* ── Flights ── */
+  .flight-list { padding: 6px 8px 10px; }
+  .fl-times { font-size: 13px; }
+
+  /* ── Hotels ── */
+  .hotel-list { padding: 0 8px 10px; }
+
+  /* ── Map section: stack vertically ── */
+  .sec-body {
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: unset !important;
+  }
+  .attr-list {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: unset !important;
+    height: auto !important;
+    max-height: 45vh;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid #e8eaed;
+  }
+  .map-wrap {
+    width: 100% !important;
+    height: 55vw !important;
+    min-height: 240px !important;
+    max-height: 320px !important;
+  }
+  .leaflet-map { height: 100% !important; }
+
+  /* ── Map toolbar: horizontal on mobile ── */
+  .map-tb {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    top: auto !important;
+    bottom: 8px !important;
+    right: 8px !important;
+    left: 8px !important;
+    gap: 4px;
+  }
+  .mtb-btn { font-size: 11px; padding: 5px 10px; }
+  .mtb-search { width: 140px; }
+
+  /* ── Sec header ── */
+  .sec-head { padding: 8px 12px; flex-wrap: wrap; gap: 4px; }
+  .sec-name { font-size: 13px; }
+
+  /* ── Day tabs: horizontal scroll ── */
+  .day-tabs { overflow-x: auto; flex-wrap: nowrap !important; padding: 4px 10px; }
+  .day-tab  { white-space: nowrap; flex-shrink: 0; font-size: 11px; padding: 5px 9px; }
+
+  /* ── City tab bar in map ── */
+  #city-tab-bar { top: 0 !important; position: sticky; }
+  .city-tab-btn { font-size: 11px; padding: 9px 4px; }
+
+  /* ── Attraction items ── */
+  .attr-item { padding: 8px 8px 8px 10px; }
+  .attr-ctrl { opacity: 1 !important; } /* always show on touch */
+  .attr-num  { width: 18px; height: 18px; font-size: 9px; }
+  .cat-icon  { width: 28px; height: 28px; font-size: 14px; }
+  .attr-name { font-size: 12px; }
+  .attr-sub  { font-size: 10.5px; }
+  .attr-day-badge { font-size: 9px; padding: 2px 5px; }
+
+  /* ── Add attraction btn ── */
+  .add-attr-btn { font-size: 12px; padding: 9px; }
+
+  /* ── Sec summary ── */
+  .sec-summary { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+  .sum-chip     { font-size: 11px; }
+
+  /* ── CRUD modal ── */
+  .crud-ov-wrap { align-items: flex-end !important; padding: 0 !important; }
+  .crud-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 18px 18px 0 0 !important;
+    max-height: 88vh !important;
+    padding: 16px 16px 24px !important;
+  }
+
+  /* ── Pickers ── */
+  .cat-picker   { width: 100% !important; grid-template-columns: repeat(4,1fr); }
+  .trans-picker { width: 100% !important; grid-template-columns: repeat(4,1fr); }
+
+  /* ── Timeline ── */
+  .tl-wrap  { border-radius: 10px; overflow: hidden; }
+  .tl-scroll{ overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tl-table { min-width: 560px; }
+
+  /* ── Add section btn ── */
+  .add-sec { margin: 10px 12px; font-size: 12px; }
+
+  /* ── Section summary chips ── */
+  .sec-summary { font-size: 11px; }
+}
+
+/* ── Very small phones ≤ 390px ── */
+@media (max-width: 390px) {
+  .tab-btn { font-size: 8.5px; }
+  .city-tab-btn { font-size: 10px; }
+  .ov-stat-num { font-size: 19px; }
+  .tc-title { font-size: 15px; }
+}
+
 @media print{
   .tc-actions,.sec-meta,.map-tb,.add-attr-btn,.add-sec,.attr-ctrl,
   .add-day-btn,.add-sec{display:none!important}
@@ -2463,7 +2643,7 @@ updateOvStats();
 
 </script>
 <!-- CRUD Modal -->
-<div id="crud-ov" onclick="if(event.target===this)crudClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center">
+<div id="crud-ov" class="crud-ov-wrap" onclick="if(event.target===this)crudClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center">
   <div class="crud-box">
     <div class="crud-hd"><span id="crud-title">編輯</span><button class="crud-x" onclick="crudClose()">✕</button></div>
     <div id="crud-body"></div>
