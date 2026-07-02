@@ -237,6 +237,8 @@ body{font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
 /* ── Print ── */
 
 
+.gmap-btn{display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#1A7A52;border:1px solid #a5d6a7;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:700;text-decoration:none;cursor:pointer;transition:.12s}
+.gmap-btn:hover{background:#c8e6c9;text-decoration:none}
 .edit-btn{background:#f0f4ff;border:1px solid rgba(24,119,242,.25);color:#1877f2;border-radius:6px;padding:2px 7px;font-size:11px;cursor:pointer;font-family:inherit;line-height:1.4}
 .edit-btn:hover{background:#dce8fd}
 .has-coord{font-size:9.5px;color:#1877f2;background:#eef4ff;padding:1px 6px;border-radius:8px;cursor:pointer;margin-top:2px;display:inline-block}
@@ -2040,8 +2042,7 @@ function renderMapMarkers(sec){
     }).bindTooltip(`${grp.length} 個景點`,{sticky:true}).addTo(m);
   });
 
-  // Route lines: drawn async via OSRM (replaces straight lines)
-  renderRouteLines(sec);
+  // No route lines - markers only
 
   // Markers
   displayed.forEach((a,idx)=>{
