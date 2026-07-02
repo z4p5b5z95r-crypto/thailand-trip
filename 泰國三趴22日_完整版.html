@@ -446,6 +446,13 @@ body{font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
         <div class="city-card-body">11 天 · 奧南海灘 · 萊利灣 · 四島 · 皮皮島</div>
       </div>
     </div>
+    <div class="ov-block" style="background:#fff;border-radius:14px;padding:14px 16px 12px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+      <div class="ov-block-hd">
+        <span class="ov-block-title">👥 旅行成員</span>
+        <button class="ov-block-add" onclick="switchTab('members')">管理成員 →</button>
+      </div>
+      <div id="ov-member-grid" class="member-grid"></div>
+    </div>
     <div class="tl-wrap">
       <div class="tl-title">👥 成員出行時間軸</div>
       <div class="tl-scroll"><div id="tl-table-wrap"></div></div>
@@ -2156,8 +2163,7 @@ Object.keys(hmap).forEach(id=>{
 function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 function renderMembers(){
-  var g=document.getElementById('member-grid');if(!g)return;
-  g.innerHTML=MEMBERS.map(function(m,i){
+  var html=MEMBERS.map(function(m,i){
     return '<div class="mc-card" style="border-top-color:'+m.color+'">'+
       '<div class="mc-name" style="color:'+m.color+'">'+escH(m.name)+'</div>'+
       '<div class="mc-date-row">'+
@@ -2171,6 +2177,8 @@ function renderMembers(){
         '<button class="ov-dbtn" onclick="ovDel(\'member\','+i+')">✕</button>'+
       '</div></div>';
   }).join('');
+  var g=document.getElementById('member-grid'); if(g) g.innerHTML=html;
+  var og=document.getElementById('ov-member-grid'); if(og) og.innerHTML=html;
 }
 
 function renderFlights(){
