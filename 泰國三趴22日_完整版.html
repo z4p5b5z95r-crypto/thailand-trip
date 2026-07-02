@@ -1797,6 +1797,26 @@ function renderList(sec){
   const ad=activeDays[sec.id]||0;
   const shown=ad===0?sec.attractions:sec.attractions.filter(a=>a.day===ad);
 
+  // Compute chain times for the current day view
+  var _dtimes = {};
+  if(ad > 0){
+    var _cur = null;
+    shown.forEach(function(a, idx){
+      if(idx === 0){
+        _cur = a.startTime || null; // anchor: user sets first attraction's time
+        if(_cur) _dtimes[a.id] = fmtTimeRange(_cur, a.stayMins||60);
+      } else {
+        if(_cur){
+          var prev = shown[idx-1];
+          var transit = estimateMins(prev, a, prev.nextT||'walk') || 0;
+          var newStart = addMinutes(_cur, (prev.stayMins||60) + transit);
+          _dtimes[a.id] = fmtTimeRange(newStart, a.stayMins||60);
+          _cur = newStart;
+        }
+      }
+    });
+  }
+
   shown.forEach((a,idx)=>{
     const c=CAT[a.cat]||CAT.other;
     const dc=dayColor(a.day||1);
@@ -2644,7 +2664,7 @@ function saveAttrTime(sid,aid){
 
 
 // ── Attraction Edit Modal ────────────────────────────────────────────────
-var _ae = {sid:null, aid:null}; // holds current edit IDs (avoids onclick quote hell)
+var _ae = {sid:null, aid:null};
 
 function openAttrEdit(sid, aid){
   _ae.sid = sid; _ae.aid = aid;
@@ -2663,10 +2683,22 @@ function openAttrEdit(sid, aid){
 
   var coordHint = (a.lat&&a.lng)
     ? '✅ 已定位：'+a.lat.toFixed(5)+', '+a.lng.toFixed(5)
-    : '尚未定位，可貼 Google Maps 連結自動解析';
+    : '尚未定位';
 
   document.getElementById('crud-title').textContent = '✏️ 編輯景點';
   document.getElementById('crud-body').innerHTML =
+
+    // ── 1. 關鍵字快速搜尋 ──
+    '<div class="cf" style="background:#f8faff;border-radius:10px;padding:10px 12px;border:1px solid #d6e4fd">'+
+      '<label style="color:#1877f2">🔍 關鍵字搜尋地點（自動帶入資訊）</label>'+
+      '<div style="display:flex;gap:6px">'+
+        '<input id="ae-search" placeholder="輸入地名、飯店、景點…" style="flex:1">'+
+        '<button onclick="aeSearchPlace()" style="background:#1877f2;color:#fff;border:none;border-radius:7px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap">搜尋</button>'+
+      '</div>'+
+      '<div id="ae-search-res" style="margin-top:4px"></div>'+
+    '</div>'+
+
+    // ── 2. 基本資訊 ──
     '<div class="cf"><label>景點名稱</label><input id="ae-name" value="'+escH(a.name||'')+'"></div>'+
     '<div class="cf"><label>備註說明</label><input id="ae-sub" value="'+escH(a.sub||'')+'"></div>'+
     '<div class="cf2">'+
@@ -2677,14 +2709,23 @@ function openAttrEdit(sid, aid){
       '<div class="cf"><label>開始時間</label><input id="ae-time" type="time" value="'+(a.startTime||'')+'"></div>'+
       '<div class="cf"><label>停留（分鐘）</label><input id="ae-mins" type="number" min="5" step="5" value="'+(a.stayMins||60)+'"></div>'+
     '</div>'+
-    '<div class="cf"><label>📍 Google Maps 網址（貼上自動解析座標）</label>'+
-      '<input id="ae-gmap" placeholder="https://maps.app.goo.gl/... 或完整網址" value="'+escH(a.gmapUrl||'')+'">'+
+
+    // ── 3. Google Maps URL ──
+    '<div class="cf" style="border-top:1px dashed #e0e4ea;padding-top:10px;margin-top:2px">'+
+      '<label>📍 Google Maps 網址（貼上自動解析）</label>'+
+      '<div style="display:flex;gap:6px">'+
+        '<input id="ae-gmap" placeholder="https://www.google.com/maps/place/... 或短網址" value="'+escH(a.gmapUrl||'')+'" style="flex:1">'+
+        '<button onclick="aeParseGmap()" style="background:#34a853;color:#fff;border:none;border-radius:7px;padding:6px 10px;cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap">解析</button>'+
+      '</div>'+
       '<div id="ae-coord-hint" style="font-size:10.5px;color:#888;margin-top:3px">'+coordHint+'</div>'+
     '</div>'+
     '<div class="cf2">'+
-      '<div class="cf"><label>緯度 Lat</label><input id="ae-lat" type="number" step="0.00001" value="'+(a.lat||'')+'"></div>'+
-      '<div class="cf"><label>經度 Lng</label><input id="ae-lng" type="number" step="0.00001" value="'+(a.lng||'')+'"></div>'+
-    '</div>';
+      '<div class="cf"><label>緯度 Lat</label><input id="ae-lat" type="number" step="0.00001" value="'+(a.lat||'')+'">'+
+      '</div>'+
+      '<div class="cf"><label>經度 Lng</label><input id="ae-lng" type="number" step="0.00001" value="'+(a.lng||'')+'">'+
+      '</div>'+
+    '</div>'+
+    '<button onclick="aeReverseGeocode()" style="width:100%;padding:7px;border:1.5px dashed #ccc;border-radius:8px;background:none;font-size:11.5px;color:#555;cursor:pointer;font-family:inherit;margin-top:2px">🔄 用目前座標反查地名</button>';
 
   document.getElementById('crud-btns').innerHTML =
     '<button class="crud-cancel" onclick="crudClose()">取消</button>'+
@@ -2692,24 +2733,152 @@ function openAttrEdit(sid, aid){
 
   document.getElementById('crud-ov').style.display = 'flex';
 
-  // Auto-parse Google Maps URL after DOM ready
+  // Enter key on search
   setTimeout(function(){
-    var gmapEl = document.getElementById('ae-gmap');
-    if(!gmapEl) return;
-    gmapEl.addEventListener('input', function(){
-      var url = this.value;
-      var m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
-             || url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/)
-             || url.match(/ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
-      if(m){
-        document.getElementById('ae-lat').value = m[1];
-        document.getElementById('ae-lng').value = m[2];
-        var hint = document.getElementById('ae-coord-hint');
-        hint.textContent = '✅ 解析成功：'+m[1]+', '+m[2];
-        hint.style.color = '#1A7A52';
-      }
-    });
+    var el = document.getElementById('ae-search');
+    if(el) el.addEventListener('keydown', function(e){ if(e.key==='Enter') aeSearchPlace(); });
+    var gmap = document.getElementById('ae-gmap');
+    if(gmap) gmap.addEventListener('input', function(){ aeParseGmapUrl(this.value, false); });
   }, 50);
+}
+
+// ── Parse Google Maps URL ─────────────────────────────
+function aeParseGmapUrl(url, updateName){
+  if(!url) return false;
+  // Extract coords
+  var m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+         || url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/)
+         || url.match(/ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  // Extract place name from URL path like /maps/place/Name+Here/@...
+  var nm = url.match(/\/maps\/place\/([^/@?]+)/);
+  var placeName = nm ? decodeURIComponent(nm[1].replace(/\+/g,' ')) : null;
+
+  if(m){
+    document.getElementById('ae-lat').value = m[1];
+    document.getElementById('ae-lng').value = m[2];
+    var hint = document.getElementById('ae-coord-hint');
+    hint.textContent = '✅ 已解析座標：'+m[1]+', '+m[2];
+    hint.style.color = '#1A7A52';
+    if(placeName && updateName){
+      document.getElementById('ae-name').value = placeName;
+    }
+    // Auto reverse geocode to fill name if we have name from URL
+    if(placeName && !document.getElementById('ae-name').value){
+      document.getElementById('ae-name').value = placeName;
+    }
+    return true;
+  }
+  return false;
+}
+
+function aeParseGmap(){
+  var url = (document.getElementById('ae-gmap')?.value||'').trim();
+  var ok = aeParseGmapUrl(url, true);
+  if(!ok){
+    // Try reverse geocode if manual lat/lng exist
+    var lat = parseFloat(document.getElementById('ae-lat')?.value);
+    var lng = parseFloat(document.getElementById('ae-lng')?.value);
+    if(!isNaN(lat) && !isNaN(lng)){
+      aeReverseGeocodeCoords(lat, lng);
+    } else {
+      var hint = document.getElementById('ae-coord-hint');
+      hint.textContent = '⚠️ 無法解析此網址，請貼完整長網址或手動輸入座標';
+      hint.style.color = '#e74c3c';
+    }
+  } else {
+    // After parsing coords, reverse geocode for name
+    var lat = parseFloat(document.getElementById('ae-lat')?.value);
+    var lng = parseFloat(document.getElementById('ae-lng')?.value);
+    if(!isNaN(lat) && !isNaN(lng)){
+      aeReverseGeocodeCoords(lat, lng);
+    }
+  }
+}
+
+function aeReverseGeocode(){
+  var lat = parseFloat(document.getElementById('ae-lat')?.value);
+  var lng = parseFloat(document.getElementById('ae-lng')?.value);
+  if(isNaN(lat)||isNaN(lng)||!lat||!lng){
+    alert('請先設定座標'); return;
+  }
+  aeReverseGeocodeCoords(lat, lng);
+}
+
+function aeReverseGeocodeCoords(lat, lng){
+  var hint = document.getElementById('ae-coord-hint');
+  hint.textContent = '⏳ 查詢中…';
+  hint.style.color = '#888';
+  var url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng+'&accept-language=zh-TW,en';
+  fetch(url, {headers:{'Accept-Language':'zh-TW,en'}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      hint.textContent = '✅ '+lat.toFixed(5)+', '+lng.toFixed(5);
+      hint.style.color = '#1A7A52';
+      // Fill name if empty
+      var nameEl = document.getElementById('ae-name');
+      if(nameEl && !nameEl.value.trim()){
+        var name = d.name || d.namedetails?.name
+          || d.address?.tourism || d.address?.hotel || d.address?.amenity
+          || d.address?.road || d.display_name?.split(',')[0] || '';
+        nameEl.value = name;
+      }
+      // Fill sub with address
+      var subEl = document.getElementById('ae-sub');
+      if(subEl && !subEl.value.trim() && d.display_name){
+        subEl.value = d.display_name.split(',').slice(0,3).join(', ');
+      }
+    })
+    .catch(function(){ hint.textContent = '✅ 座標已設定（查詢地名失敗）'; });
+}
+
+// ── Keyword Search via Nominatim ──────────────────────
+function aeSearchPlace(){
+  var q = (document.getElementById('ae-search')?.value||'').trim();
+  if(!q) return;
+  var res = document.getElementById('ae-search-res');
+  res.innerHTML = '<div style="font-size:11px;color:#888;padding:4px 0">⏳ 搜尋中…</div>';
+
+  // Add Thailand bias
+  var url = 'https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=5&accept-language=zh-TW,en&countrycodes=th';
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data.length){
+        // Try without country filter
+        return fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=5&accept-language=zh-TW,en')
+          .then(function(r){return r.json();});
+      }
+      return data;
+    })
+    .then(function(data){
+      if(!data.length){ res.innerHTML='<div style="font-size:11px;color:#e74c3c;padding:4px 0">找不到結果，請換關鍵字</div>'; return; }
+      res.innerHTML = data.map(function(d,i){
+        var label = d.display_name.split(',').slice(0,3).join(', ');
+        return '<div onclick="aePickPlace('+i+')" data-idx="'+i+'" style="padding:7px 10px;border-radius:8px;cursor:pointer;font-size:11.5px;border-bottom:1px solid #f0f2f5;transition:.1s" '+
+          'onmouseover="this.style.background=\'#eef4ff\'" onmouseout="this.style.background=\'\'">'+
+          '<div style="font-weight:700;color:#1a2a4a">'+escH(d.display_name.split(',')[0])+'</div>'+
+          '<div style="color:#888;font-size:10px">'+escH(label)+'</div>'+
+          '</div>';
+      }).join('');
+      window._aeSrData = data;
+    })
+    .catch(function(){ res.innerHTML='<div style="font-size:11px;color:#e74c3c">搜尋失敗，請檢查網路</div>'; });
+}
+
+function aePickPlace(i){
+  var d = window._aeSrData && window._aeSrData[i];
+  if(!d) return;
+  document.getElementById('ae-lat').value  = parseFloat(d.lat).toFixed(6);
+  document.getElementById('ae-lng').value  = parseFloat(d.lon).toFixed(6);
+  var nameEl = document.getElementById('ae-name');
+  if(nameEl && !nameEl.value.trim()) nameEl.value = d.display_name.split(',')[0];
+  var subEl = document.getElementById('ae-sub');
+  if(subEl && !subEl.value.trim()) subEl.value = d.display_name.split(',').slice(0,3).join(', ');
+  var hint = document.getElementById('ae-coord-hint');
+  hint.textContent = '✅ 已選取：'+d.lat+', '+d.lon;
+  hint.style.color = '#1A7A52';
+  document.getElementById('ae-search-res').innerHTML =
+    '<div style="font-size:11px;color:#1A7A52;padding:4px 0">✅ 已選取：'+escH(d.display_name.split(',')[0])+'</div>';
 }
 
 function saveAttrEdit(){
