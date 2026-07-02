@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>旅遊計劃</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -2379,9 +2379,24 @@ function aaPick(i){
   document.getElementById('aa-res').innerHTML='<div style="font-size:11px;color:#1A7A52;padding:4px 0">✅ 已選取：'+escH(nm)+'</div>';
 }
 
-function aaParseGmap(){
+async function aaParseGmap(){
   var url=(document.getElementById('aa-gmap')?.value||'').trim();
   if(!url) return;
+  var loc=document.getElementById('aa-loc');
+  if(/maps\.app\.goo\.gl|goo\.gl\/maps/.test(url)){
+    if(loc){loc.textContent='⏳ 解析短網址中…';loc.style.color='#888';}
+    try{
+      var pr=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url));
+      var pd=await pr.json();
+      var resolved=pd.status?.url||'';
+      if(!resolved||!resolved.includes('google.com/maps')){
+        var cm=(pd.contents||'').match(/https:\/\/www\.google\.com\/maps[^"'\s]*/);
+        resolved=cm?cm[0]:'';
+      }
+      if(resolved) url=resolved;
+      else{if(loc){loc.textContent='⚠️ 短網址解析失敗，請在瀏覽器開啟後複製完整網址';loc.style.color='#e74c3c';} return;}
+    }catch(e){if(loc){loc.textContent='⚠️ 短網址解析失敗，請在瀏覽器開啟後複製完整網址';loc.style.color='#e74c3c';} return;}
+  }
   var m=url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
     ||url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/)
     ||url.match(/ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -2399,8 +2414,7 @@ function aaParseGmap(){
         var subEl=document.getElementById('aa-sub');if(subEl&&!subEl.value.trim())subEl.value=d.display_name.split(',').slice(0,3).join(', ');
       }).catch(function(){});
   } else {
-    var loc=document.getElementById('aa-loc');
-    if(loc){loc.textContent='⚠️ 無法解析，請貼完整長網址';loc.style.color='#e74c3c';}
+    if(loc){loc.textContent='⚠️ 無法解析，請使用搜尋功能或貼完整網址';loc.style.color='#e74c3c';}
   }
 }
 
@@ -2896,12 +2910,8 @@ function openAttrEdit(sid, aid){
       '</div>'+
       '<div id="ae-coord-hint" style="font-size:10.5px;color:#888;margin-top:3px">'+coordHint+'</div>'+
     '</div>'+
-    '<div class="cf2">'+
-      '<div class="cf"><label>緯度 Lat</label><input id="ae-lat" type="number" step="0.00001" value="'+(a.lat||'')+'">'+
-      '</div>'+
-      '<div class="cf"><label>經度 Lng</label><input id="ae-lng" type="number" step="0.00001" value="'+(a.lng||'')+'">'+
-      '</div>'+
-    '</div>'+
+    '<input type="hidden" id="ae-lat" value="'+(a.lat||'')+'">'+
+    '<input type="hidden" id="ae-lng" value="'+(a.lng||'')+'">'+
     '<button onclick="aeReverseGeocode()" style="width:100%;padding:7px;border:1.5px dashed #ccc;border-radius:8px;background:none;font-size:11.5px;color:#555;cursor:pointer;font-family:inherit;margin-top:2px">🔄 用目前座標反查地名</button>';
 
   document.getElementById('crud-btns').innerHTML =
@@ -2948,27 +2958,32 @@ function aeParseGmapUrl(url, updateName){
   return false;
 }
 
-function aeParseGmap(){
+async function aeParseGmap(){
   var url = (document.getElementById('ae-gmap')?.value||'').trim();
+  if(!url) return;
+  var hint = document.getElementById('ae-coord-hint');
+  if(/maps\.app\.goo\.gl|goo\.gl\/maps/.test(url)){
+    hint.textContent = '⏳ 解析短網址中…'; hint.style.color = '#888';
+    try{
+      var pr = await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url));
+      var pd = await pr.json();
+      var resolved = pd.status?.url || '';
+      if(!resolved || !resolved.includes('google.com/maps')){
+        var cm = (pd.contents||'').match(/https:\/\/www\.google\.com\/maps[^"'\s]*/);
+        resolved = cm ? cm[0] : '';
+      }
+      if(resolved) url = resolved;
+      else{ hint.textContent='⚠️ 短網址解析失敗，請在瀏覽器開啟後複製完整網址'; hint.style.color='#e74c3c'; return; }
+    }catch(e){ hint.textContent='⚠️ 短網址解析失敗，請在瀏覽器開啟後複製完整網址'; hint.style.color='#e74c3c'; return; }
+  }
   var ok = aeParseGmapUrl(url, true);
   if(!ok){
-    // Try reverse geocode if manual lat/lng exist
-    var lat = parseFloat(document.getElementById('ae-lat')?.value);
-    var lng = parseFloat(document.getElementById('ae-lng')?.value);
-    if(!isNaN(lat) && !isNaN(lng)){
-      aeReverseGeocodeCoords(lat, lng);
-    } else {
-      var hint = document.getElementById('ae-coord-hint');
-      hint.textContent = '⚠️ 無法解析此網址，請貼完整長網址或手動輸入座標';
-      hint.style.color = '#e74c3c';
-    }
+    hint.textContent = '⚠️ 無法解析此網址格式，請使用搜尋功能';
+    hint.style.color = '#e74c3c';
   } else {
-    // After parsing coords, reverse geocode for name
     var lat = parseFloat(document.getElementById('ae-lat')?.value);
     var lng = parseFloat(document.getElementById('ae-lng')?.value);
-    if(!isNaN(lat) && !isNaN(lng)){
-      aeReverseGeocodeCoords(lat, lng);
-    }
+    if(!isNaN(lat) && !isNaN(lng)){ aeReverseGeocodeCoords(lat, lng); }
   }
 }
 
