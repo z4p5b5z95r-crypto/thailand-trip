@@ -236,6 +236,14 @@ body{font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
 
 /* ── Print ── */
 
+
+.edit-btn{background:#f0f4ff;border:1px solid rgba(24,119,242,.25);color:#1877f2;border-radius:6px;padding:2px 7px;font-size:11px;cursor:pointer;font-family:inherit;line-height:1.4}
+.edit-btn:hover{background:#dce8fd}
+.has-coord{font-size:9.5px;color:#1877f2;background:#eef4ff;padding:1px 6px;border-radius:8px;cursor:pointer;margin-top:2px;display:inline-block}
+.has-coord:hover{background:#dce8fd;text-decoration:underline}
+.ae-map-preview{width:100%;height:180px;border-radius:10px;overflow:hidden;border:1px solid #dde1e7;margin-top:4px;position:relative}
+.ae-map-preview .leaflet-map{width:100%;height:100%}
+
 /* ══════════════════════════════════════════
    MOBILE RESPONSIVE  ≤ 768px
 ══════════════════════════════════════════ */
@@ -1807,12 +1815,13 @@ function renderList(sec){
           onblur="attrF('${sec.id}','${a.id}','sub',this.textContent)">${esc(a.sub||'')}</span>
         <span class="attr-time ${a.startTime?'':'unset'}"
           onclick="editAttrTime('${sec.id}','${a.id}',event)">${a.startTime?fmtTimeRange(a.startTime,a.stayMins||60):'⏰ 設定時間'}</span>
-        ${(!a.lat||!a.lng)?`<span class="no-coord" onclick="pinMode('${sec.id}','${a.id}')">📍 點地圖定位</span>`:''}
+        ${(!a.lat||!a.lng)?`<span class="no-coord" onclick="pinMode('${sec.id}','${a.id}')">📍 點地圖定位</span>`:`<span class="has-coord" onclick="openAttrEdit('${sec.id}','${a.id}')">📍 ${a.lat.toFixed(4)},${a.lng.toFixed(4)}</span>`}
       </div>
       ${ad===0?`<span class="attr-day-badge" style="background:${dc}"
         title="點擊更改天數" onclick="openDayPicker('${sec.id}','${a.id}',this)">${secDayDate(sec,a.day||1)}</span>`:''}
       <div class="attr-ctrl">
         <span class="drag-handle" title="拖曳排序">⠿</span>
+        <button class="edit-btn" onclick="openAttrEdit('${sec.id}','${a.id}')">✏️</button>
         <button class="del" onclick="delAttr('${sec.id}','${a.id}')">✕</button>
       </div>`;
     list.appendChild(item);
@@ -2631,6 +2640,96 @@ function saveAttrTime(sid,aid){
   a.startTime=document.getElementById('et-start')?.value||null;
   a.stayMins=+(document.getElementById('et-stay')?.value||60);
   save(); crudClose(); renderList(sec);
+}
+
+
+// ── Attraction Edit Modal ────────────────────────────────────────────────
+var _ae = {sid:null, aid:null}; // holds current edit IDs (avoids onclick quote hell)
+
+function openAttrEdit(sid, aid){
+  _ae.sid = sid; _ae.aid = aid;
+  var sec = trip.sections.find(function(s){return s.id===sid;});
+  var a   = sec && sec.attractions.find(function(x){return x.id===aid;});
+  if(!a) return;
+
+  var CAT_OPTS = Object.keys(CAT).map(function(k){
+    return '<option value="'+k+'"'+(a.cat===k?' selected':'')+'>'+CAT[k].e+' '+k+'</option>';
+  }).join('');
+
+  var dayOpts = '';
+  for(var d=1; d<=(sec.days||1); d++){
+    dayOpts += '<option value="'+d+'"'+(a.day===d?' selected':'')+'>'+secDayDate(sec,d)+'</option>';
+  }
+
+  var coordHint = (a.lat&&a.lng)
+    ? '✅ 已定位：'+a.lat.toFixed(5)+', '+a.lng.toFixed(5)
+    : '尚未定位，可貼 Google Maps 連結自動解析';
+
+  document.getElementById('crud-title').textContent = '✏️ 編輯景點';
+  document.getElementById('crud-body').innerHTML =
+    '<div class="cf"><label>景點名稱</label><input id="ae-name" value="'+escH(a.name||'')+'"></div>'+
+    '<div class="cf"><label>備註說明</label><input id="ae-sub" value="'+escH(a.sub||'')+'"></div>'+
+    '<div class="cf2">'+
+      '<div class="cf"><label>類別</label><select id="ae-cat">'+CAT_OPTS+'</select></div>'+
+      '<div class="cf"><label>日期</label><select id="ae-day">'+dayOpts+'</select></div>'+
+    '</div>'+
+    '<div class="cf2">'+
+      '<div class="cf"><label>開始時間</label><input id="ae-time" type="time" value="'+(a.startTime||'')+'"></div>'+
+      '<div class="cf"><label>停留（分鐘）</label><input id="ae-mins" type="number" min="5" step="5" value="'+(a.stayMins||60)+'"></div>'+
+    '</div>'+
+    '<div class="cf"><label>📍 Google Maps 網址（貼上自動解析座標）</label>'+
+      '<input id="ae-gmap" placeholder="https://maps.app.goo.gl/... 或完整網址" value="'+escH(a.gmapUrl||'')+'">'+
+      '<div id="ae-coord-hint" style="font-size:10.5px;color:#888;margin-top:3px">'+coordHint+'</div>'+
+    '</div>'+
+    '<div class="cf2">'+
+      '<div class="cf"><label>緯度 Lat</label><input id="ae-lat" type="number" step="0.00001" value="'+(a.lat||'')+'"></div>'+
+      '<div class="cf"><label>經度 Lng</label><input id="ae-lng" type="number" step="0.00001" value="'+(a.lng||'')+'"></div>'+
+    '</div>';
+
+  document.getElementById('crud-btns').innerHTML =
+    '<button class="crud-cancel" onclick="crudClose()">取消</button>'+
+    '<button class="crud-ok" onclick="saveAttrEdit()">儲存</button>';
+
+  document.getElementById('crud-ov').style.display = 'flex';
+
+  // Auto-parse Google Maps URL after DOM ready
+  setTimeout(function(){
+    var gmapEl = document.getElementById('ae-gmap');
+    if(!gmapEl) return;
+    gmapEl.addEventListener('input', function(){
+      var url = this.value;
+      var m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+             || url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/)
+             || url.match(/ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if(m){
+        document.getElementById('ae-lat').value = m[1];
+        document.getElementById('ae-lng').value = m[2];
+        var hint = document.getElementById('ae-coord-hint');
+        hint.textContent = '✅ 解析成功：'+m[1]+', '+m[2];
+        hint.style.color = '#1A7A52';
+      }
+    });
+  }, 50);
+}
+
+function saveAttrEdit(){
+  var sid = _ae.sid, aid = _ae.aid;
+  var sec = trip.sections.find(function(s){return s.id===sid;});
+  var a   = sec && sec.attractions.find(function(x){return x.id===aid;});
+  if(!a) return;
+  a.name      = (document.getElementById('ae-name')?.value||'').trim();
+  a.sub       = (document.getElementById('ae-sub')?.value||'').trim();
+  a.cat       = document.getElementById('ae-cat')?.value || a.cat;
+  a.day       = +(document.getElementById('ae-day')?.value || a.day);
+  a.startTime = document.getElementById('ae-time')?.value || null;
+  a.stayMins  = +(document.getElementById('ae-mins')?.value || 60);
+  var lat     = parseFloat(document.getElementById('ae-lat')?.value);
+  var lng     = parseFloat(document.getElementById('ae-lng')?.value);
+  var gmap    = (document.getElementById('ae-gmap')?.value||'').trim();
+  if(!isNaN(lat) && !isNaN(lng) && lat && lng){ a.lat = lat; a.lng = lng; }
+  if(gmap) a.gmapUrl = gmap;
+  save(); crudClose();
+  renderList(sec); renderMapMarkers(sec); renderSummary(sec); renderDayTabs(sec);
 }
 
 // ── Initialize ───────────────────────────────────────────────────────────────
