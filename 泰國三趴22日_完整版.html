@@ -582,6 +582,7 @@ body{font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
 .drag-handle:hover{color:#888}
 .drag-handle:active{cursor:grabbing}
 .attr-item.drag-over{background:#e8f0fe;border-left-color:var(--blue)!important}
+.attr-item.list-highlight{background:#fffbeb!important;border-left-color:#f59e0b!important;box-shadow:0 0 0 2px rgba(245,158,11,.35)!important;transition:all .25s}
 .attr-item.dragging{opacity:.4}
 
 </style>
@@ -1526,7 +1527,7 @@ const MEMBERS=[
   {name:'依凡', color:'#4A9EE8',from:'7/23',to:'8/1', note:'7/23 出發・8/1 回台，清邁+曼谷前段'},
   {name:'棋哥', color:'#AF52DE',from:'7/23',to:'8/1', note:'7/23 出發・8/1 回台，清邁+曼谷前段'},
   {name:'將軍', color:'#34C759',from:'7/23',to:'8/13',note:'全程 22 天，三城完整參與'},
-  {name:'書書', color:'#FF2D55',from:'8/3', to:'8/8', note:'8/3 加入・曼谷→甲米→返曼谷，8/8 回台'},
+  {name:'書書', color:'#FF2D55',from:'7/30', to:'8/8', note:'7/30 飛曼谷・曼谷→甲米→返曼谷，8/8 回台'},
   {name:'小武', color:'#FF9500',from:'7/30',to:'8/3', note:'7/30 從台灣加入曼谷，8/3 回台'},
   {name:'阿淳', color:'#5856D6',from:'7/30',to:'8/3', note:'7/30 從台灣加入曼谷，8/3 回台'},
 ];
@@ -1837,7 +1838,7 @@ function renderList(sec){
           onblur="attrF('${sec.id}','${a.id}','sub',this.textContent)">${esc(a.sub||'')}</span>
         <span class="attr-time ${(_dtimes[a.id]||a.startTime)?'':'unset'}"
           onclick="editAttrTime('${sec.id}','${a.id}',${idx===0&&ad>0},event)">${_dtimes[a.id]||(a.startTime?fmtTimeRange(a.startTime,a.stayMins||60):'⏰ 設定時間')}</span>
-        ${(!a.lat||!a.lng)?`<span class="no-coord" onclick="pinMode('${sec.id}','${a.id}')">📍 點地圖定位</span>`:`<span class="has-coord" onclick="openAttrEdit('${sec.id}','${a.id}')">📍 ${a.lat.toFixed(4)},${a.lng.toFixed(4)}</span>`}
+        ${(!a.lat||!a.lng)?`<span class="no-coord" onclick="pinMode('${sec.id}','${a.id}')">📍 點地圖定位</span>`:`<a class="gmap-btn" href="https://www.google.com/maps?q=${a.lat},${a.lng}" target="_blank" rel="noopener">🗺 Google Maps</a>`}
       </div>
       ${ad===0?`<span class="attr-day-badge" style="background:${dc}"
         title="點擊更改天數" onclick="openDayPicker('${sec.id}','${a.id}',this)">${secDayDate(sec,a.day||1)}</span>`:''}
@@ -2049,18 +2050,19 @@ function renderMapMarkers(sec){
     if(!a.lat||!a.lng) return;
     const c=a.cat==='_custom_'?{e:a.customE||'📌',bg:'#e8e8e8',l:a.customL||'自訂'}:(CAT[a.cat]||CAT.other);
     const dc=dayColor(a.day||1);
-    const num=displayed.filter(x=>x.lat&&x.lng).indexOf(a)+1;
+    const num=idx+1; // sequential number matching left panel
     const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46">
       <ellipse cx="18" cy="43" rx="7" ry="3.5" fill="rgba(0,0,0,.15)"/>
       <path d="M18 1C8.05 1 0 9.05 0 19c0 11 18 26 18 26S36 30 36 19C36 9.05 27.95 1 18 1z" fill="${c.c}"/>
       <circle cx="18" cy="19" r="11" fill="rgba(255,255,255,.93)"/>
       <text x="18" y="23.5" text-anchor="middle" font-size="12">${c.e}</text>
       <circle cx="29" cy="9" r="7" fill="${dc}" stroke="#fff" stroke-width="1.5"/>
-      <text x="29" y="12.5" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">${a.day||1}</text>
+      <text x="29" y="12.5" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">${num}</text>
     </svg>`;
     const icon=L.divIcon({html:svg,className:'',iconSize:[36,46],iconAnchor:[18,46],popupAnchor:[0,-48]});
     const mk=L.marker([a.lat,a.lng],{icon,draggable:false}).addTo(m).bindPopup(mkPopup(sec.id,a.id));
     mk._aid=a.id; mk._sid=sec.id;
+    mk.on('click',()=>{ highlightListItem(a.id); });
     mk.on('dragend',e=>{
       a.lat=+e.target.getLatLng().lat.toFixed(6);
       a.lng=+e.target.getLatLng().lng.toFixed(6);
@@ -3091,6 +3093,17 @@ function saveAttrEdit(){
   if(gmap) a.gmapUrl = gmap;
   save(); crudClose();
   renderList(sec); renderMapMarkers(sec); renderSummary(sec); renderDayTabs(sec);
+}
+
+// ── Highlight list item from map click ──────────────────────────────────────
+function highlightListItem(aid){
+  document.querySelectorAll('.attr-item.list-highlight').forEach(el=>el.classList.remove('list-highlight'));
+  const el=document.getElementById('ai-'+aid);
+  if(el){
+    el.classList.add('list-highlight');
+    el.scrollIntoView({behavior:'smooth',block:'nearest'});
+    setTimeout(()=>el.classList.remove('list-highlight'),2500);
+  }
 }
 
 // ── Initialize ───────────────────────────────────────────────────────────────
